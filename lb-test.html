@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>南方东英产品行情</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        h1 { color: #333; }
+        table { border-collapse: collapse; width: 100%; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #0066cc; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .loading { color: #666; }
+        .error { color: red; }
+        .success { color: green; }
+        #status { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .connected { background: #d4edda; color: #155724; }
+        .disconnected { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>📈 南方东英产品实时行情</h1>
+    <div id="status" class="disconnected">状态: 等待连接...</div>
+    
+    <h2>产品代码</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>代码</th>
+                <th>名称</th>
+                <th>最新价</th>
+                <th>涨跌额</th>
+                <th>涨跌幅</th>
+                <th>更新时间</th>
+            </tr>
+        </thead>
+        <tbody id="quotes">
+            <tr><td colspan="6" class="loading">正在连接行情...</td></tr>
+        </tbody>
+    </table>
+
+    <script>
+        // 南方东英产品代码列表 (境内ETF)
+        const symbols = [
+            { code: '513130.HK', name: '恒生科技ETF' },
+            { code: '159687.HK', name: '亚太精选ETF' },
+            { code: '513730.HK', name: '东南亚科技ETF' },
+            { code: '159822.HK', name: '新经济ETF' },
+            { code: '159329.HK', name: '沙特ETF' },
+        ];
+        
+        let ws = null;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+        
+        const statusEl = document.getElementById('status');
+        const quotesEl = document.getElementById('quotes');
+        
+        function updateStatus(message, type) {
+            statusEl.textContent = '状态: ' + message;
+            statusEl.className = type;
+        }
+        
+        function renderQuotes(quotes) {
+            const quoteMap = {};
+            quotes.forEach(q => {
+                const symbol = q.symbol;
+                const found = symbols.find(s => s.code === symbol);
+                if (found) {
+                    quoteMap[symbol] = q;
+                }
+            });
+            
+            let html = '';
+            symbols.forEach(s => {
+                const q = quoteMap[s.code];
+                if (q) {
+                    const change = parseFloat(q.last) - parseFloat(q.prev_close);
+                    const changePercent = ((change / parseFloat(q.prev_close)) * 100).toFixed(2);
+                    const isUp = change >= 0;
+                    html += `
+                        <tr>
+                            <td>${s.code}</td>
+                            <td>${s.name}</td>
+                            <td>${q.last}</td>
+                            <td style="color: ${isUp ? 'red' : 'green'}">${isUp ? '+' : ''}${change.toFixed(2)}</td>
+                            <td style="color: ${isUp ? 'red' : 'green'}">${isUp ? '+' : ''}${changePercent}%</td>
+                            <td>${new Date().toLocaleTimeString()}</td>
+                        </tr>
+                    `;
+                } else {
+                    html += `
+                        <tr>
+                            <td>${s.code}</td>
+                            <td>${s.name}</td>
+                            <td colspan="4" class="loading">暂无数据</td>
+                        </tr>
+                    `;
+                }
+            });
+            quotesEl.innerHTML = html;
+        }
+        
+        async function connect() {
+            try {
+                // Get OTP first
+                updateStatus('正在获取连接凭证...', 'loading');
+                
+                const otpResponse = await fetch('https://openapi.longbridge.com/v1/socket/token', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImViNzNlNDQxNTI4NzQzNzMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL29wZW5hcGkubG9uZ2JyaWRnZS5jb20iLCJzdWIiOiJ7XCJjbGllbnRfaWRcIjpcImZkNTJmYmM1LTAyYTktNDdmNS1hZDMwLTA4NDJjODQxYWFlOVwiLFwibWVtYmVyX2lkXCI6MTQ3ODIyMjEsXCJhcHBfaWRcIjpcImxvbmdicmlkZ2VcIixcImFjY291bnRfY2hhbm5lbFwiOlwibGJcIixcInRhcmdldF9hYWlkXCI6XCIyMDQzMTA3NFwiLFwibXNfaWRcIjpcImxvbmdicmlkZ2VcIixcImJhc2VfbGV2ZWxcIjozfSIsImF1ZCI6WyIxNyIsIjc4IiwiNzkiLCI4MCIsIjEzNyIsIjE3OSIsIjE4MCIsIjMiLCI0IiwiNSIsIjYiLCIyMTciLCIyMjIiLCIyMjMiLCIxMyIsIjE0IiwiMTUiLCIxNiIsIjE5IiwiMjkiLCIzMCIsIjEwIiwiMTEiLCIxMiJdLCJleHAiOjE3NzYxMDIzNTYsImlhdCI6MTc3NjA5ODc1NiwianRpIjoiZ3IxQXEyZDdUWlIycXZVSy9VTWRUZz09Iiwic2NvcGVfaWRzIjpbNCw1LDYsNywxMCwxMV0sInRva2VuX3R5cGUiOiJhY2Nlc3NfdG9rZW4ifQ.k7Gksfj1_OLgLot5jYGNVc-YlOHtyAqH7z8BuSNnMBTBefeDnmEOERQQ28IYJExXln9BjbevLgOrEkK6US8Sf_A-za0bdHEsDxmzCMS9fbjUmxA3akv4k28la4OZ9GWsFhgtSFrKg8G02vY3lrvca6SdgEtgRPmciNVzgjsZtb9vyAeZ6njnk1yKILP9fpEAdjliifr9c5-3a8aM79i8FXLoOTRgPc22RJGgHYqG84X07Cou7B-UZc2RjRj3TKr3uKvUWGJxpy7wwVJ0An8H543_SA3IDysI3WhJqThYBPqrwxi6Hmf2SasqAmiJId2tz1htaWpG4b6rQgtTj32KMw',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const otpData = await otpResponse.json();
+                if (otpData.code !== 0) {
+                    throw new Error('获取OTP失败: ' + otpData.message);
+                }
+                
+                const otp = otpData.data.otp;
+                updateStatus('正在连接WebSocket...', 'loading');
+                
+                // Connect to WebSocket
+                ws = new WebSocket(`wss://openapi-quote.longbridge.com/v2?otp=${otp}`);
+                
+                ws.onopen = function() {
+                    updateStatus('已连接，正在订阅行情...', 'connected');
+                    reconnectAttempts = 0;
+                    
+                    // Subscribe to quotes
+                    const subscribeMsg = {
+                        method: "subscribe",
+                        params: {
+                            symbol: symbols.map(s => s.code),
+                            sub_type: [1],  // Quote
+                            is_first_push: true
+                        },
+                        id: 1
+                    };
+                    ws.send(JSON.stringify(subscribeMsg));
+                };
+                
+                ws.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    console.log('Received:', data);
+                    
+                    if (data.method === 'push' && data.params) {
+                        const quotes = data.params.quote;
+                        if (quotes && quotes.length > 0) {
+                            renderQuotes(quotes);
+                        }
+                    }
+                };
+                
+                ws.onerror = function(error) {
+                    console.error('WebSocket error:', error);
+                    updateStatus('连接错误', 'error');
+                };
+                
+                ws.onclose = function() {
+                    updateStatus('连接已断开', 'disconnected');
+                    
+                    // Try to reconnect
+                    if (reconnectAttempts < maxReconnectAttempts) {
+                        reconnectAttempts++;
+                        setTimeout(connect, 2000);
+                    }
+                };
+                
+            } catch (error) {
+                console.error('Error:', error);
+                updateStatus('错误: ' + error.message, 'error');
+            }
+        }
+        
+        // Start connection
+        connect();
+    </script>
+</body>
+</html>

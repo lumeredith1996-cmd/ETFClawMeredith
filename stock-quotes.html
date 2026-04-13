@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>南方东英产品行情</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { 
+            color: white; 
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .update-time { 
+            color: rgba(255,255,255,0.8); 
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .refresh-btn {
+            display: block;
+            margin: 0 auto 20px;
+            padding: 10px 30px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .refresh-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            background: white; 
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        th, td { 
+            padding: 15px 12px; 
+            text-align: center;
+        }
+        th { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        tr:nth-child(even) { background: #f8f9fa; }
+        tr:hover { background: #e9ecef; }
+        .symbol { font-weight: bold; color: #333; }
+        .name { color: #666; font-size: 14px; }
+        .price { font-size: 18px; font-weight: bold; color: #333; }
+        .up { color: #e74c3c; }
+        .down { color: #27ae60; }
+        .change-positive { 
+            background: #fee;
+            color: #e74c3c;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .change-negative { 
+            background: #efe;
+            color: #27ae60;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error-msg {
+            background: #fee;
+            color: #c0392b;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: white;
+            margin-bottom: 15px;
+        }
+        .auto-refresh input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📈 南方东英产品行情</h1>
+        <p class="update-time" id="updateTime">正在加载...</p>
+        
+        <div class="auto-refresh">
+            <input type="checkbox" id="autoRefresh" checked>
+            <label for="autoRefresh">自动刷新 (30秒)</label>
+        </div>
+        
+        <button class="refresh-btn" id="refreshBtn" onclick="fetchQuotes()">
+            🔄 刷新行情
+        </button>
+        
+        <div id="error" class="error-msg" style="display: none;"></div>
+        
+        <table id="quotesTable">
+            <thead>
+                <tr>
+                    <th>代码</th>
+                    <th>名称</th>
+                    <th>最新价</th>
+                    <th>涨跌额</th>
+                    <th>涨跌幅</th>
+                    <th>开盘</th>
+                    <th>最高</th>
+                    <th>最低</th>
+                </tr>
+            </thead>
+            <tbody id="quotesBody">
+                <tr><td colspan="8" class="loading"><div class="spinner"></div>正在获取行情数据...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // 南方东英产品 - 境内ETF (需要添加 HK 后缀)
+        const SYMBOLS = [
+            { code: '513130.HK', name: '恒生科技ETF' },
+            { code: '159687.HK', name: '亚太精选ETF' },
+            { code: '513730.HK', name: '东南亚科技ETF' },
+            { code: '159822.HK', name: '新经济ETF' },
+            { code: '159329.HK', name: '沙特ETF' },
+            { code: '520830.HK', name: '沙特ETF(场外)' },
+        ];
+        
+        // 境外产品 - 美股
+        const US_SYMBOLS = [
+            { code: 'AAPL', name: '苹果' },
+            { code: 'NVDA', name: '英伟达' },
+            { code: 'MSFT', name: '微软' },
+            { code: 'GOOGL', name: '谷歌' },
+            { code: 'AMZN', name: '亚马逊' },
+            { code: 'META', name: 'Meta' },
+            { code: 'TSLA', name: '特斯拉' },
+        ];
+        
+        let autoRefreshInterval = null;
+        
+        async function fetchYahooQuote(symbol) {
+            // Yahoo Finance v7 API
+            const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
+            
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const result = data.quoteResponse;
+                
+                if (result && result.result && result.result.length > 0) {
+                    return result.result[0];
+                }
+                return null;
+            } catch (error) {
+                console.error(`Error fetching ${symbol}:`, error);
+                return null;
+            }
+        }
+        
+        async function fetchQuotes() {
+            const btn = document.getElementById('refreshBtn');
+            const errorDiv = document.getElementById('error');
+            const tbody = document.getElementById('quotesBody');
+            
+            btn.disabled = true;
+            btn.textContent = '🔄 加载中...';
+            errorDiv.style.display = 'none';
+            tbody.innerHTML = '<tr><td colspan="8" class="loading"><div class="spinner"></div>正在获取行情数据...</td></tr>';
+            
+            try {
+                // Fetch HK symbols
+                const hkPromises = SYMBOLS.map(s => fetchYahooQuote(s.code));
+                const hkResults = await Promise.all(hkPromises);
+                
+                // Fetch US symbols
+                const usPromises = US_SYMBOLS.map(s => fetchYahooQuote(s.code));
+                const usResults = await Promise.all(usPromises);
+                
+                let html = '';
+                let hasData = false;
+                
+                // HK ETFs
+                SYMBOLS.forEach((s, i) => {
+                    const q = hkResults[i];
+                    if (q && q.symbol) {
+                        hasData = true;
+                        const change = q.regularMarketChange || 0;
+                        const changePercent = q.regularMarketChangePercent || 0;
+                        const isUp = change >= 0;
+                        html += `
+                            <tr>
+                                <td class="symbol">${q.symbol}</td>
+                                <td class="name">${s.name}</td>
+                                <td class="price">${q.regularMarketPrice ? q.regularMarketPrice.toFixed(3) : 'N/A'}</td>
+                                <td class="${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${change.toFixed(3)}</td>
+                                <td><span class="${isUp ? 'change-positive' : 'change-negative'}">${isUp ? '+' : ''}${changePercent.toFixed(2)}%</span></td>
+                                <td>${q.regularMarketOpen ? q.regularMarketOpen.toFixed(3) : 'N/A'}</td>
+                                <td>${q.regularMarketDayHigh ? q.regularMarketDayHigh.toFixed(3) : 'N/A'}</td>
+                                <td>${q.regularMarketDayLow ? q.regularMarketDayLow.toFixed(3) : 'N/A'}</td>
+                            </tr>
+                        `;
+                    } else {
+                        html += `
+                            <tr>
+                                <td class="symbol">${s.code}</td>
+                                <td class="name">${s.name}</td>
+                                <td colspan="6" style="color: #999;">暂无数据</td>
+                            </tr>
+                        `;
+                    }
+                });
+                
+                // Separator
+                html += '<tr><td colspan="8" style="background: #667eea; color: white; text-align: center; font-weight: bold;">美 股</td></tr>';
+                
+                // US Stocks
+                US_SYMBOLS.forEach((s, i) => {
+                    const q = usResults[i];
+                    if (q && q.symbol) {
+                        hasData = true;
+                        const change = q.regularMarketChange || 0;
+                        const changePercent = q.regularMarketChangePercent || 0;
+                        const isUp = change >= 0;
+                        html += `
+                            <tr>
+                                <td class="symbol">${q.symbol}</td>
+                                <td class="name">${s.name}</td>
+                                <td class="price">$${q.regularMarketPrice ? q.regularMarketPrice.toFixed(2) : 'N/A'}</td>
+                                <td class="${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${change.toFixed(2)}</td>
+                                <td><span class="${isUp ? 'change-positive' : 'change-negative'}">${isUp ? '+' : ''}${changePercent.toFixed(2)}%</span></td>
+                                <td>$${q.regularMarketOpen ? q.regularMarketOpen.toFixed(2) : 'N/A'}</td>
+                                <td>$${q.regularMarketDayHigh ? q.regularMarketDayHigh.toFixed(2) : 'N/A'}</td>
+                                <td>$${q.regularMarketDayLow ? q.regularMarketDayLow.toFixed(2) : 'N/A'}</td>
+                            </tr>
+                        `;
+                    } else {
+                        html += `
+                            <tr>
+                                <td class="symbol">${s.code}</td>
+                                <td class="name">${s.name}</td>
+                                <td colspan="6" style="color: #999;">暂无数据</td>
+                            </tr>
+                        `;
+                    }
+                });
+                
+                tbody.innerHTML = html;
+                
+                if (!hasData) {
+                    errorDiv.textContent = '部分数据获取失败，请检查网络连接后重试';
+                    errorDiv.style.display = 'block';
+                }
+                
+                document.getElementById('updateTime').textContent = 
+                    `最后更新: ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}`;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                errorDiv.textContent = '获取行情失败: ' + error.message;
+                errorDiv.style.display = 'block';
+                tbody.innerHTML = '<tr><td colspan="8" class="loading" style="color: #c0392b;">数据加载失败</td></tr>';
+            }
+            
+            btn.disabled = false;
+            btn.textContent = '🔄 刷新行情';
+        }
+        
+        // Auto refresh
+        function setupAutoRefresh() {
+            const checkbox = document.getElementById('autoRefresh');
+            
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) {
+                    autoRefreshInterval = setInterval(fetchQuotes, 30000);
+                } else {
+                    clearInterval(autoRefreshInterval);
+                }
+            });
+            
+            if (checkbox.checked) {
+                autoRefreshInterval = setInterval(fetchQuotes, 30000);
+            }
+        }
+        
+        // Initial load
+        fetchQuotes();
+        setupAutoRefresh();
+    </script>
+</body>
+</html>

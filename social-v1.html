@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>投资大V观点追踪</title>
 <style>
-:root{--bg:#f5f6fa;--card:#fff;--card2:#f0f2f8;--border:#e2e5ef;--text:#1a1d2e;--text2:#6b7280;--dim:#9ca3af;--green:#16a34a;--red:#dc2626;--orange:#ea580c;--blue:#2563eb;--gold:#d97706;--xueqiu:#eb4d4d;--weibo:#ff6b35;--wechat:#07c160;--video:#e1306c;}
+:root{--bg:#f5f6fa;--card:#fff;--card2:#f0f2f8;--border:#e2e5ef;--text:#1a1d2e;--text2:#6b7280;--dim:#9ca3af;--green:#16a34a;--red:#dc2626;--orange:#ea580c;--blue:#2563eb;--gold:#d97706;--xueqiu:#eb4d4d;--weibo:#ff6b35;--wechat:#07c160;--video:#e1306c;--truth:#d4405f;}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 .header{background:var(--card);border-bottom:2px solid var(--border);padding:0 32px;display:flex;justify-content:space-between;align-items:center;height:58px;position:sticky;top:0;z-index:100}
@@ -24,7 +24,7 @@ body{font-family:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;backgr
 .ta.xq.ac{color:var(--xueqiu);border-bottom-color:var(--xueqiu)}
 .ta.wb.ac{color:var(--weibo);border-bottom-color:var(--weibo)}
 .ta.wx.ac{color:var(--wechat);border-bottom-color:var(--wechat)}
-.ta.vd.ac{color:var(--video);border-bottom-color:var(--video)}
+.ta.vd.ac{color:var(--video);border-bottom-color:var(--video)}.ta.tr.ac{color:var(--truth);border-bottom-color:var(--truth)}
 .mn{padding:20px 32px;max-width:1280px;margin:0 auto}
 .pn{display:none}.pn.ac{display:block}
 .info-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:11px 14px;font-size:12px;color:#92400e;margin-bottom:16px;line-height:1.65}
@@ -55,7 +55,7 @@ body{font-family:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;backgr
 .tag-chip.xq{background:#fef2f2;color:#b91c1c}
 .tag-chip.wb{background:#fff7ed;color:#c2410c}
 .tag-chip.wx{background:#f0fdf4;color:#15803d}
-.tag-chip.vd{background:#fdf2f8;color:#be185d}
+.tag-chip.vd{background:#fdf2f8;color:#be185d}.tag-chip.tr{background:#fdf2f8;color:#d4405f}.picon-tr{background:#d4405f;color:#fff}
 .empty-state{text-align:center;padding:60px 0;color:var(--dim);font-size:14px}
 .empty-state .icon{font-size:48px;margin-bottom:12px;opacity:.4}
 .loading{text-align:center;padding:40px;color:var(--dim);font-size:13px}
@@ -87,6 +87,7 @@ body{font-family:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;backgr
   <div class="ta wb" data-p="微博">🟠 微博</div>
   <div class="ta wx" data-p="微信公众号">🟢 公众号</div>
   <div class="ta vd" data-p="视频号">📺 视频号</div>
+  <div class="ta tr" data-p="特朗普">🇺🇸 特朗普</div>
 </div>
 
 <div class="mn" id="main">
@@ -128,6 +129,9 @@ const ALL_INFLUENCERS = {
   视频号: [
     {name:'MrKC深夜学堂',   video:'MrKC深夜学堂'},
     {name:'trader韭',       video:'trader韭'},
+  ],
+  特朗普: [
+    {name:'特朗普',         truth:'realDonaldTrump'},
   ]
 };
 
@@ -297,6 +301,11 @@ async function fetchAll() {
     results.forEach(function(r){ items=items.concat(r); });
   }
 
+  if (curPlatform==='全部'||curPlatform==='特朗普') {
+    var trumpItems = await fetchTrump().catch(function(){return[];});
+    items = items.concat(trumpItems);
+  }
+
   items.sort(function(a,b){ return (b.pubDate||0)-(a.pubDate||0); });
   return items.slice(0,100);
 }
@@ -338,7 +347,51 @@ function getPlatClass(p) {
   if(p==='微博') return 'wb';
   if(p==='微信公众号') return 'wx';
   if(p==='视频号') return 'vd';
+  if(p==='特朗普') return 'tr';
   return '';
+}
+
+// ============================================================
+// 特朗普 Truth Social (direct from hketf-lab public API)
+// ============================================================
+async function fetchTrump() {
+  var TRUMP_API = 'https://hketf-lab.pages.dev/api/pulse/trump-truth-archive';
+  try {
+    var r = await fetch(TRUMP_API);
+    if (!r.ok) return [];
+    var d = await r.json();
+    if (!d || !d.posts || !d.posts.length) return [];
+    return d.posts.slice(0,20).map(function(p) {
+      // Prefer simplified Chinese
+      var text = p.content_zh_cn || stripHtml(p.content_html) || p.content || '';
+      var mediaHtml = '';
+      if (p.media && p.media.length > 0) {
+        var m = p.media[0];
+        if (m.type === 'image' && m.url) {
+          mediaHtml = '<br><img src="'+m.url+'" style="max-width:100%;border-radius:8px;margin:8px 0;max-height:300px;object-fit:contain" loading="lazy">';
+        } else if (m.type === 'video' && m.url) {
+          mediaHtml = '<br><video src="'+m.url+'" controls style="max-width:100%;border-radius:8px;margin:8px 0;max-height:300px"></video>';
+        }
+      }
+      var pubMs = 0;
+      if (p.created_at) { var dd = new Date(p.created_at); if(!isNaN(dd)) pubMs = dd.getTime(); }
+      return {
+        title: text ? text.substr(0,80) : '',
+        content: text + mediaHtml,
+        link: p.url || p.status_url || '#',
+        pubDate: pubMs,
+        author: '特朗普 @realDonaldTrump',
+        platform: '特朗普',
+        icon: '🇺🇸',
+        originalText: stripHtml(p.content_html) || p.content || ''
+      };
+    });
+  } catch(e) { return []; }
+}
+
+function stripHtml(html) {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").trim();
 }
 
 function renderFeeds(items) {

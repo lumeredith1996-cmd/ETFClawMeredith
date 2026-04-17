@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>投资大V观点追踪</title>
+<style>
+:root{--bg:#f5f6fa;--card:#fff;--card2:#f0f2f8;--border:#e2e5ef;--text:#1a1d2e;--text2:#6b7280;--dim:#9ca3af;--green:#16a34a;--red:#dc2626;--orange:#ea580c;--blue:#2563eb;--gold:#d97706;--xueqiu:#eb4d4d;--weibo:#ff6b35;--wechat:#07c160;--video:#e1306c;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:var(--card);border-bottom:2px solid var(--border);padding:0 32px;display:flex;justify-content:space-between;align-items:center;height:58px;position:sticky;top:0;z-index:100}
+.logo{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+.logo .beta{background:var(--orange);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px}
+.hdr-right{display:flex;align-items:center;gap:14px}
+.upd{font-size:12px;color:var(--dim)}
+.lt{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pl 2s infinite}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.3}}
+.live{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:5px}
+#qr-btn{background:var(--blue);color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer}#qr-btn:hover{background:#1d4ed8}#qr-btn.loading{opacity:.6;cursor:not-allowed}#qr-msg{font-size:11px;color:var(--green);margin-left:6px}
+.tabs{background:var(--card);padding:0 32px;display:flex;border-bottom:1px solid var(--border);overflow-x:auto}
+.ta{padding:12px 22px;font-size:14px;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:600;transition:.15s;white-space:nowrap}
+.ta:hover{color:var(--orange)}
+.ta.ac{color:var(--orange);border-bottom-color:var(--orange)}
+.ta.xq.ac{color:var(--xueqiu);border-bottom-color:var(--xueqiu)}
+.ta.wb.ac{color:var(--weibo);border-bottom-color:var(--weibo)}
+.ta.wx.ac{color:var(--wechat);border-bottom-color:var(--wechat)}
+.ta.vd.ac{color:var(--video);border-bottom-color:var(--video)}
+.mn{padding:20px 32px;max-width:1280px;margin:0 auto}
+.pn{display:none}.pn.ac{display:block}
+.info-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:11px 14px;font-size:12px;color:#92400e;margin-bottom:16px;line-height:1.65}
+.fbar{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap}
+.fsub{display:flex;gap:4px;margin-bottom:14px;padding-left:4px;flex-wrap:wrap}
+.fbtn{padding:5px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);color:var(--dim);background:var(--card);transition:.15s;white-space:nowrap;user-select:none}
+.fbtn.ac,.fbtn:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.fsub-item{padding:4px 11px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);color:var(--dim);background:var(--card);transition:.15s}
+.fsub-item.ac,.fsub-item:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.posts{display:flex;flex-direction:column;gap:12px}
+.post-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;transition:.15s}
+.post-card:hover{border-color:var(--orange);box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.post-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;background:var(--bg);flex-shrink:0}
+.platform-icon{width:20px;height:20px;border-radius:4px;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.picon-xq{background:#eb4d4d;color:#fff}
+.picon-wb{background:#ff6b35;color:#fff}
+.picon-wx{background:#07c160;color:#fff}
+.picon-vd{background:#e1306c;color:#fff}
+.author-info{flex:1;min-width:0}
+.author-name{font-size:13px;font-weight:700;color:var(--text)}
+.post-time{font-size:11px;color:var(--dim)}
+.post-content{font-size:13px;line-height:1.7;color:var(--text);margin-bottom:10px;word-break:break-all}
+.post-footer{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border)}
+.post-link{font-size:11px;color:var(--blue);text-decoration:none}
+.post-link:hover{text-decoration:underline}
+.tag-chip{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.tag-chip.xq{background:#fef2f2;color:#b91c1c}
+.tag-chip.wb{background:#fff7ed;color:#c2410c}
+.tag-chip.wx{background:#f0fdf4;color:#15803d}
+.tag-chip.vd{background:#fdf2f8;color:#be185d}
+.empty-state{text-align:center;padding:60px 0;color:var(--dim);font-size:14px}
+.empty-state .icon{font-size:48px;margin-bottom:12px;opacity:.4}
+.loading{text-align:center;padding:40px;color:var(--dim);font-size:13px}
+.error-box{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;font-size:12px;color:#b91c1c;margin-bottom:16px}
+.stat-bar{display:flex;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+.stat-item{font-size:12px;color:var(--dim)}
+.stat-item span{color:var(--text);font-weight:700}
+@media(max-width:768px){.header{padding:0 16px}.mn{padding:16px}.tabs{padding:0 16px}.logo .beta{display:none}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">
+    <span>📡</span>
+    <span>投资大V观点</span>
+    <span class="beta">BETA</span>
+  </div>
+  <div class="hdr-right">
+    <span class="upd" id="upt"></span>
+    <button id="qr-btn" onclick="refreshFeeds()">🔄 刷新</button>
+    <span id="qr-msg"></span>
+    <div class="live"><span class="lt"></span>实时</div>
+  </div>
+</div>
+
+<div class="tabs" id="fbar">
+  <div class="ta ac" data-p="全部">📊 全部</div>
+  <div class="ta xq" data-p="雪球">🔴 雪球</div>
+  <div class="ta wb" data-p="微博">🟠 微博</div>
+  <div class="ta wx" data-p="微信公众号">🟢 公众号</div>
+  <div class="ta vd" data-p="视频号">📺 视频号</div>
+</div>
+
+<div class="mn" id="main">
+  <div class="fsub" id="fsub"></div>
+
+  <div class="info-box" id="info-box">
+    📌 雪球/微博/公众号/视频号 聚合追踪｜🔄 每5分钟自动刷新｜⚠️ 微博/视频号部分需要登录cookie，暂无内容属正常
+  </div>
+
+  <div class="stat-bar" id="stat-bar"></div>
+  <div id="feeds-container"><div class="loading">加载中...</div></div>
+</div>
+
+<script>
+// ============================================================
+// 大V 名单
+// ============================================================
+const ALL_INFLUENCERS = {
+  雪球: [
+    {name:'大道无形我有型', uid:'1247347556', desc:'价值投资'},
+  ],
+  微博: [
+    {name:'山基说',         screen:'山基说'},
+    {name:'表舅是养基大户',  screen:'表舅是养基大户'},
+    {name:'ETF总剁手',       screen:'ETF总剁手'},
+    {name:'GMF_Light',      screen:'GMF_Light'},
+    {name:'纳兰容客',        screen:'纳兰容客'},
+    {name:'月相分析',        screen:'月相分析'},
+  ],
+  微信公众号: [
+    {name:'寻瑕记',         mp:'寻瑕记'},
+    {name:'星辰大海的边界',  mp:'星辰大海的边界'},
+    {name:'猫笔刀',         mp:'猫笔刀'},
+    {name:'奶员外',         mp:'奶员外'},
+    {name:'刘备教授',       mp:'刘备教授'},
+    {name:'范范爱养基',     mp:'范范爱养基'},
+    {name:'韭圈儿',         mp:'韭圈儿'},
+  ],
+  视频号: [
+    {name:'MrKC深夜学堂',   video:'MrKC深夜学堂'},
+    {name:'trader韭',       video:'trader韭'},
+  ]
+};
+
+const RSSHUB_BASE = 'https://regulatory-voluntary-mighty-charter.trycloudflare.com';
+
+// ============================================================
+// State
+// ============================================================
+var curPlatform = '全部';
+var curAuthor = '全部';
+var allItems = [];
+var lastUpdate = '';
+
+// ============================================================
+// 雪球 timeline
+// ============================================================
+async function fetchXueqiu(uid) {
+  try {
+    var r = await fetch('https://xueqiu.com/v4/statuses/user_timeline.json?user_id=' + uid + '&page=1&count=10', {
+      headers:{'User-Agent':'Mozilla/5.0','Referer':'https://xueqiu.com'}
+    });
+    if (!r.ok) return [];
+    var d = await r.json();
+    return (d.list||[]).map(function(item){
+      var text = (item.text||'').replace(/<[^>]+>/g,'');
+      return {
+        title: text.substr(0,80),
+        content: text.substr(0,300),
+        link: 'https://xueqiu.com/'+uid+'/status/'+item.id,
+        pubDate: item.created_at||0,
+        author: (item.user||{}).screen_name||uid,
+        platform:'雪球', icon:'🔴'
+      };
+    });
+  } catch(e){ return []; }
+}
+
+// ============================================================
+// 微博 RSS (RSSHub)
+// ============================================================
+async function fetchWeiboRSS(screen) {
+  try {
+    var rssUrl = RSSHUB_BASE + '/rsshub/weibo/user/' + encodeURIComponent(screen);
+    var items = await fetchRSS(rssUrl);
+    items.forEach(function(i){ i.platform='微博'; i.icon='🟠'; i.author=screen; });
+    return items;
+  } catch(e){ return []; }
+}
+
+// ============================================================
+// 微信公众号 RSS (RSSHub)
+// ============================================================
+async function fetchWechatRSS(mp) {
+  try {
+    var rssUrl = RSSHUB_BASE + '/rsshub/wechat/mp/' + encodeURIComponent(mp);
+    var items = await fetchRSS(rssUrl);
+    items.forEach(function(i){ i.platform='微信公众号'; i.icon='🟢'; i.author=mp; });
+    return items;
+  } catch(e){ return []; }
+}
+
+// ============================================================
+// 视频号 RSS (RSSHub wechat channel)
+// ============================================================
+async function fetchVideoRSS(video) {
+  try {
+    var rssUrl = RSSHUB_BASE + '/rsshub/wechat/channel/' + encodeURIComponent(video);
+    var items = await fetchRSS(rssUrl);
+    items.forEach(function(i){ i.platform='视频号'; i.icon='📺'; i.author=video; });
+    return items;
+  } catch(e){ return []; }
+}
+
+// ============================================================
+// 通用 RSS 解析
+// ============================================================
+async function fetchRSS(url) {
+  var r = await fetch(url);
+  if (!r.ok) throw new Error('HTTP '+r.status);
+  return parseRSS(await r.text());
+}
+
+function parseRSS(xml) {
+  var items = [];
+  var ms = xml.match(/<item[\s\S]*?<\/item>/gi) || [];
+  if (!ms.length) ms = xml.match(/<entry[\s\S]*?<\/entry>/gi) || [];
+  ms.forEach(function(item) {
+    var title = (item.match(/<title[^>]*>([^<]*)<\/title>/i)||[])[1]||'';
+    var link  = (item.match(/<link[^>]*href=["']([^"']+)["']/i)||[])[1]||'';
+    var body  = (item.match(/<(?:description|summary|content)>([^<]*)<\/(?:description|summary|content)>/i)||[])[1]||'';
+    var date  = (item.match(/<(?:pubDate|published|updated)>([^<]*)<\/(?:pubDate|published|updated)>/i)||[])[1]||'';
+    title = title.replace(/<[^>]+>/g,'').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;/g,"'").trim();
+    body  = body.replace(/<[^>]+>/g,'').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/<br\s*\/?>/gi,' ').replace(/\s+/g,' ').trim();
+    var dateMs = 0;
+    if (date){ var dd=new Date(date); if(!isNaN(dd)) dateMs=dd.getTime(); }
+    if (title||body) items.push({title, content:body||title, link, pubDate:dateMs, pubDateStr:date, author:'', platform:'', icon:''});
+  });
+  return items;
+}
+
+// ============================================================
+// 聚合拉取
+// ============================================================
+async function fetchAll() {
+  var items = [];
+
+  if (curPlatform==='全部'||curPlatform==='雪球') {
+    var xqList = curAuthor==='全部' ? ALL_INFLUENCERS['雪球'] : ALL_INFLUENCERS['雪球'].filter(function(u){return u.name===curAuthor;});
+    var promises = xqList.map(function(u){ return fetchXueqiu(u.uid).catch(function(){return[];}); });
+    var results = await Promise.all(promises);
+    results.forEach(function(r){ items=items.concat(r); });
+  }
+
+  if (curPlatform==='全部'||curPlatform==='微博') {
+    var wbList = curAuthor==='全部' ? ALL_INFLUENCERS['微博'] : ALL_INFLUENCERS['微博'].filter(function(u){return u.name===curAuthor;});
+    var promises = wbList.map(function(u){ return fetchWeiboRSS(u.screen).catch(function(){return[];}); });
+    var results = await Promise.all(promises);
+    results.forEach(function(r){ items=items.concat(r); });
+  }
+
+  if (curPlatform==='全部'||curPlatform==='微信公众号') {
+    var wxList = curAuthor==='全部' ? ALL_INFLUENCERS['微信公众号'] : ALL_INFLUENCERS['微信公众号'].filter(function(u){return u.name===curAuthor;});
+    var promises = wxList.map(function(u){ return fetchWechatRSS(u.mp).catch(function(){return[];}); });
+    var results = await Promise.all(promises);
+    results.forEach(function(r){ items=items.concat(r); });
+  }
+
+  if (curPlatform==='全部'||curPlatform==='视频号') {
+    var vdList = curAuthor==='全部' ? ALL_INFLUENCERS['视频号'] : ALL_INFLUENCERS['视频号'].filter(function(u){return u.name===curAuthor;});
+    var promises = vdList.map(function(u){ return fetchVideoRSS(u.video).catch(function(){return[];}); });
+    var results = await Promise.all(promises);
+    results.forEach(function(r){ items=items.concat(r); });
+  }
+
+  items.sort(function(a,b){ return (b.pubDate||0)-(a.pubDate||0); });
+  return items.slice(0,100);
+}
+
+// ============================================================
+// 筛选栏
+// ============================================================
+function renderSubFilters() {
+  var sources = [{name:'全部',icon:'📊'}];
+  var icons = {'雪球':'🔴','微博':'🟠','微信公众号':'🟢','视频号':'📺'};
+  if (curPlatform==='全部') {
+    Object.keys(ALL_INFLUENCERS).forEach(function(p){
+      ALL_INFLUENCERS[p].forEach(function(u){ sources.push({name:u.name,icon:icons[p]}); });
+    });
+  } else {
+    (ALL_INFLUENCERS[curPlatform]||[]).forEach(function(u){ sources.push({name:u.name,icon:'•'}); });
+  }
+  document.getElementById('fsub').innerHTML = sources.map(function(s){
+    return '<span class="fsub-item'+(curAuthor===s.name?' ac':'')+'" data-author="'+s.name+'">'+s.icon+' '+s.name+'</span>';
+  }).join('');
+}
+
+// ============================================================
+// 渲染
+// ============================================================
+function formatTime(d) {
+  if (!d) return '';
+  var diff = Date.now()-d;
+  var m=Math.floor(diff/60000), h=Math.floor(diff/3600000), dd=Math.floor(diff/86400000);
+  if(m<1) return '刚刚';
+  if(m<60) return m+'分钟前';
+  if(h<24) return h+'小时前';
+  if(dd<7) return dd+'天前';
+  var d2=new Date(d); return (d2.getMonth()+1)+'-'+d2.getDate();
+}
+
+function getPlatClass(p) {
+  if(p==='雪球') return 'xq';
+  if(p==='微博') return 'wb';
+  if(p==='微信公众号') return 'wx';
+  if(p==='视频号') return 'vd';
+  return '';
+}
+
+function renderFeeds(items) {
+  var container = document.getElementById('feeds-container');
+
+  // Stats
+  var stats = {};
+  items.forEach(function(i){ stats[i.platform]=stats[i.platform]||0+1; });
+  var statHtml = Object.keys(stats).map(function(p){
+    return '<div class="stat-item"><span>'+stats[p]+'</span> 条'+p+'</div>';
+  }).join('');
+  document.getElementById('stat-bar').innerHTML = statHtml;
+
+  if (!items.length) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">📭</div>暂无内容，可能原因：平台需要登录cookie<br><span style="font-size:12px;color:var(--dim);margin-top:8px;display:block">微博/雪球RSS需要配置cookie支持，可联系管理员协助</span></div>';
+    return;
+  }
+
+  var html = '<div class="posts">';
+  items.forEach(function(item) {
+    var pc = getPlatClass(item.platform);
+    var content = (item.content||item.title||'').replace(/<[^>]+>/g,'').substr(0,220);
+    if (content.length===220) content+='…';
+    html += '<div class="post-card" onclick="window.open(\''+item.link+'\',\'_blank\')">';
+    html += '<div class="post-top">';
+    html += '<div class="platform-icon picon-'+pc+'">'+(item.icon||'📄')+'</div>';
+    html += '<div class="author-info"><div class="author-name">'+(item.author||'匿名')+'</div>';
+    html += '<div class="post-time">'+(item.pubDate?formatTime(item.pubDate):item.pubDateStr||'')+'</div></div>';
+    if(item.platform) html += '<span class="tag-chip '+pc+'">'+item.platform+'</span>';
+    html += '</div>';
+    html += '<div class="post-content">'+content+'</div>';
+    html += '<div class="post-footer"><a class="post-link" href="'+item.link+'" target="_blank" onclick="event.stopPropagation()">🔗 查看原文</a></div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
+  if (lastUpdate) document.getElementById('upt').textContent = '更新: '+lastUpdate;
+}
+
+// ============================================================
+// 事件
+// ============================================================
+document.getElementById('fbar').addEventListener('click',function(e){
+  var tab = e.target.closest('.ta');
+  if (!tab) return;
+  curPlatform = tab.dataset.p;
+  curAuthor = '全部';
+  document.querySelectorAll('.ta').forEach(function(t){t.classList.remove('ac');});
+  tab.classList.add('ac');
+  renderSubFilters();
+  loadFeeds();
+});
+
+document.getElementById('fsub').addEventListener('click',function(e){
+  var item = e.target.closest('.fsub-item');
+  if (!item) return;
+  curAuthor = item.dataset.author;
+  document.querySelectorAll('.fsub-item').forEach(function(t){t.classList.remove('ac');});
+  item.classList.add('ac');
+  loadFeeds();
+});
+
+// ============================================================
+// 加载
+// ============================================================
+var loading = false;
+function loadFeeds() {
+  if (loading) return;
+  loading = true;
+  var btn = document.getElementById('qr-btn');
+  if(btn){btn.classList.add('loading');btn.textContent='加载中…';}
+  document.getElementById('feeds-container').innerHTML='<div class="loading">加载中，请稍候...</div>';
+  fetchAll().then(function(items){
+    loading=false;
+    if(btn){btn.classList.remove('loading');btn.textContent='🔄 刷新';}
+    var now=new Date();
+    lastUpdate=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    renderFeeds(items);
+  }).catch(function(e){
+    loading=false;
+    if(btn){btn.classList.remove('loading');btn.textContent='🔄 刷新';}
+    document.getElementById('feeds-container').innerHTML='<div class="error-box">加载异常: '+e.message+'</div>';
+  });
+}
+
+function refreshFeeds(){loadFeeds();}
+
+// Init
+renderSubFilters();
+loadFeeds();
+setInterval(loadFeeds, 5*60*1000);
+</script>
+</body>
+</html>

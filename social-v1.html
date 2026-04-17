@@ -145,24 +145,59 @@ var lastUpdate = '';
 // 雪球 timeline
 // ============================================================
 async function fetchXueqiu(uid) {
+  // Try Snowball API directly first (may fail due to WAF)
   try {
     var r = await fetch('https://xueqiu.com/v4/statuses/user_timeline.json?user_id=' + uid + '&page=1&count=10', {
       headers:{'User-Agent':'Mozilla/5.0','Referer':'https://xueqiu.com'}
     });
-    if (!r.ok) return [];
-    var d = await r.json();
-    return (d.list||[]).map(function(item){
-      var text = (item.text||'').replace(/<[^>]+>/g,'');
-      return {
-        title: text.substr(0,80),
-        content: text.substr(0,300),
-        link: 'https://xueqiu.com/'+uid+'/status/'+item.id,
-        pubDate: item.created_at||0,
-        author: (item.user||{}).screen_name||uid,
-        platform:'雪球', icon:'🔴'
-      };
-    });
-  } catch(e){ return []; }
+    if (r.ok) {
+      var d = await r.json();
+      if (d.list && d.list.length > 0) {
+        return (d.list||[]).map(function(item){
+          var text = (item.text||'').replace(/<[^>]+>/g,'');
+          return {
+            title: text.substr(0,80),
+            content: text.substr(0,300),
+            link: 'https://xueqiu.com/'+uid+'/status/'+item.id,
+            pubDate: item.created_at||0,
+            author: (item.user||{}).screen_name||uid,
+            platform:'雪球', icon:'🔴'
+          };
+        });
+      }
+    }
+  } catch(e){}
+
+  // Fallback: use our Puppeteer scraper via quoteserver API
+  try {
+    var apiUrl = RSSHUB_BASE + '/api/snowball';
+    var maxWait = 90000;
+    var interval = 5000;
+    for (var waited = 0; waited < maxWait; waited += interval) {
+      var r2 = await fetch(apiUrl);
+      if (r2.ok) {
+        var allData = await r2.json();
+        if (allData && allData.length > 0) {
+          var userData = allData.find(function(u){ return u.uid == uid; });
+          if (userData && userData.posts && userData.posts.length > 0) {
+            return userData.posts.map(function(item){
+              var text = (item.text||'').replace(/<[^>]+>/g,'');
+              return {
+                title: text.substr(0,80),
+                content: text.substr(0,300),
+                link: item.link || ('https://xueqiu.com/'+uid+'/status/'+item.id),
+                pubDate: item.created || 0,
+                author: userData.name || uid,
+                platform:'雪球', icon:'🔴'
+              };
+            });
+          }
+        }
+      }
+      await new Promise(function(res){ setTimeout(res, interval); });
+    }
+  } catch(e){}
+  return [];
 }
 
 // ============================================================

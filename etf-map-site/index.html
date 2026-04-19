@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全球ETF投资地图 — 投资工具箱</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f5f6fa;--card:#fff;--card2:#f0f2f8;--border:#e2e5ef;--text:#1a1d2e;--text2:#6b7280;--dim:#9ca3af;--green:#10b981;--blue:#3b82f6;--red:#ef4444;--yellow:#f59e0b;--purple:#8b5cf6}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:var(--text);color:#fff;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.header h1{font-size:20px;font-weight:700;display:flex;align-items:center;gap:8px}
+.header-right{font-size:13px;opacity:0.6}
+.nav{display:flex;gap:8px;padding:12px 24px;background:#fff;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.nav a{color:var(--text2);text-decoration:none;font-size:14px;padding:6px 14px;border-radius:6px;transition:all 0.15s;display:inline-block}
+.nav a:hover{background:var(--card2);color:var(--text)}
+.nav a.active{background:var(--text);color:#fff}
+.intro{padding:16px 24px;background:linear-gradient(135deg,#1a1d2e 0%,#2d3154 100%);color:#fff}
+.intro p{font-size:13px;line-height:1.7;opacity:0.85;max-width:700px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;padding:20px 24px}
+.region-card{background:var(--card);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden;border:1px solid var(--border)}
+.region-header{padding:14px 16px;display:flex;align-items:flex-start;gap:12px;background:var(--card2)}
+.region-icon{font-size:24px;flex-shrink:0}
+.region-name{font-size:15px;font-weight:700;color:var(--text)}
+.region-desc{font-size:12px;color:var(--text2);margin-top:2px}
+.region-products{padding:8px}
+.p-row{display:grid;grid-template-columns:120px 95px 1fr;gap:8px;padding:8px 10px;border-radius:6px;align-items:center;transition:background 0.1s}
+.p-row:hover{background:var(--card2)}
+.p-name{font-size:13px;font-weight:600;color:var(--text)}
+.p-code{font-size:12px;color:var(--blue);font-family:monospace}
+.p-desc{font-size:12px;color:var(--text2)}
+.note-w{color:var(--yellow);font-size:11px;margin-left:4px}
+.footer{text-align:center;padding:24px;font-size:12px;color:var(--dim)}
+@media(max-width:600px){
+  .grid{grid-template-columns:1fr}
+  .p-row{grid-template-columns:1fr;gap:2px}
+  .p-code{font-size:11px}
+}
+</style>
+</head>
+<body>
+<header class="header">
+  <h1>🌏 全球ETF投资地图</h1>
+  <div class="header-right">数据更新: 2026-04-19</div>
+</header>
+<nav class="nav">
+  <a href="index.html" class="active">🗺️ 全球ETF地图</a>
+  <a href="products.html">🔎 产品筛选</a>
+</nav>
+<div class="intro">
+  <p>📌 覆盖内地、香港、美国、日本、东南亚、中东等全球主要市场 · 共 110 只ETF产品 · 点击下方分类查看各区域代表性产品</p>
+</div>
+<div class="grid">
+<div class="region-card">
+  <div class="region-header" style="border-left:4px solid #ef4444">
+    <span class="region-icon">🇨🇳</span>
+    <div>
+      <div class="region-name">🇨🇳 内地</div>
+      <div class="region-desc">内地投资者可通过QDII、港股通、跨境理财通等渠道购买</div>
+    </div>
+  </div>
+  <div class="region-products">
+    <div class="p-row">
+          <span class="p-name">QDII ETF</span>
+          <span class="p-code">513130.SH</span>
+          <span class="p-desc">恒生科技ETF<span class="note-w">⚠️ 不限额</span></span>
+        </div><div class="p-row">
+          <span class="p-name">QDII 联接基金</span>
+          <span class="p-code">015310.OF</span>
+          <span class="p-desc">恒生科技ETF联接A<span class="note-w">⚠️ 无限额</span></span>
+        </div><div class="p-row">
+          <span class="p-name">港股通ETF</span>
+          <span class="p-code">3033.HK</span>
+          <span class="p-desc">南方恒生科技ETF</span>
+        </div><div class="p-row">
+          <span class="p-name">港股通ETF-60/40产品</span>
+          <span class="p-code">3441.HK</span>
+          <span class="p-desc">东西精选ETF<span class="note-w">⚠️ 跨港美</span></span>
+        </div><div class="p-row">
+          <span class="p-name">跨境理财通-权益</span>
+          <span class="p-code">HK0000773892</span>
+          <span class="p-desc">恒生科技指数ETF<span class="note-w">⚠️ 大湾区</span></span>
+        </div><div class="p-row">
+          <span class="p-name">跨境理财通-货币</span>
+          <span class="p-code">HK0000489705</span>
+          <span class="p-desc">港元货币ETF<span class="note-w">⚠️ 大湾区</span></span>
+        </div><div class="p-row">
+          <span class="p-name">跨境理财通-固收/基金互认</span>
+          <span class="p-code">HK0000981032</span>
+          <span class="p-desc">美债20年+指数ETF<span class="note-w">⚠️ 基金互认</span></span>
+        </div>
+  </div>
+</div><div class="region-card">
+  <div class="region-header" style="border-left:4px solid #f59e0b">
+    <span class="region-icon">🇭🇰</span>
+    <div>
+      <div class="region-name">🇭🇰 香港</div>
+      <div class="region-desc">香港本地上市，覆盖港股、A股、全球市场</div>
+    </div>
+  </div>
+  <div class="region-products">
+    <div class="p-row">
+          <span class="p-name">香港股票ETF</span>
+          <span class="p-code">3033.HK</span>
+          <span class="p-desc">恒生科技ETF</span>
+        </div><div class="p-row">
+          <span class="p-name">A股ETF</span>
+          <span class="p-code">3133.HK</span>
+          <span class="p-desc">华泰柏瑞沪深300ETF</span>
+        </div><div class="p-row">
+          <span class="p-name">美国ETF</span>
+          <span class="p-code">3034.HK</span>
+          <span class="p-desc">纳斯达克100ETF</span>
+        </div><div class="p-row">
+          <span class="p-name">日本ETF</span>
+          <span class="p-code">3153.HK</span>
+          <span class="p-desc">日经225指数ETF</span>
+        </div><div class="p-row">
+          <span class="p-name">新兴市场ETF</span>
+          <span class="p-code">3004.HK</span>
+          <span class="p-desc">富时越南30ETF</span>
+        </div><div class="p-row">
+          <span class="p-name">港股通精选ETF</span>
+          <span class="p-code">3432.HK</span>
+          <span class="p-desc">港股通精选ETF<span class="note-w">⚠️ 跨市场</span></span>
+        </div><div class="p-row">
+          <span class="p-name">跨市场ETF</span>
+          <span class="p-code">3442.HK</span>
+          <span class="p-desc">港美科技ETF<span class="note-w">⚠️ 跨港美</span></span>
+        </div>
+  </div>
+</div><div class="region-card">
+  <div class="region-header" style="border-left:4px solid #14b8a6">
+    <span class="region-icon">🌏</span>
+    <div>
+      <div class="region-name">🌏 亚洲</div>
+      <div class="region-desc">覆盖亚太及东南亚精选市场</div>
+    </div>
+  </div>
+  <div class="region-products">
+    <div class="p-row">
+          <span class="p-name">港韩科技ETF</span>
+          <span class="p-code">3431.HK</span>
+          <span class="p-desc">港韩科技ETF<span class="note-w">⚠️ 跨市场</span></span>
+        </div><div class="p-row">
+          <span class="p-name">亚太精选</span>
+          <span class="p-code">159687.SZ</span>
+          <span class="p-desc">亚太精选ETF<span class="note-w">⚠️ QDII</span></span>
+        </div><div class="p-row">
+          <span class="p-name">东南亚科技</span>
+          <span class="p-code">513730.SH</span>
+          <span class="p-desc">东南亚科技ETF<span class="note-w">⚠️ QDII</span></span>
+        </div>
+  </div>
+</div><div class="region-card">
+  <div class="region-header" style="border-left:4px solid #fbbf24">
+    <span class="region-icon">🇸🇦</span>
+    <div>
+      <div class="region-name">🇸🇦 中东</div>
+      <div class="region-desc">配置石油财富与新兴消费市场</div>
+    </div>
+  </div>
+  <div class="region-products">
+    <div class="p-row">
+          <span class="p-name">沙特ETF</span>
+          <span class="p-code">2830.HK</span>
+          <span class="p-desc">沙特阿拉伯ETF</span>
+        </div><div class="p-row">
+          <span class="p-name">沙特ETF(内地)</span>
+          <span class="p-code">159329.SZ</span>
+          <span class="p-desc">沙特ETF南方<span class="note-w">⚠️ QDII</span></span>
+        </div>
+  </div>
+</div><div class="region-card">
+  <div class="region-header" style="border-left:4px solid #6366f1">
+    <span class="region-icon">💱</span>
+    <div>
+      <div class="region-name">💱 债券·货币</div>
+      <div class="region-desc">美元、人民币、港元货币与债券配置</div>
+    </div>
+  </div>
+  <div class="region-products">
+    <div class="p-row">
+          <span class="p-name">美债20年+</span>
+          <span class="p-code">3433.HK</span>
+          <span class="p-desc">美国国债20年+指数ETF</span>
+        </div><div class="p-row">
+          <span class="p-name">中国国债</span>
+          <span class="p-code">3199.HK</span>
+          <span class="p-desc">工银富时中国国债ETF</span>
+        </div><div class="p-row">
+          <span class="p-name">货币ETF(港)</span>
+          <span class="p-code">3053.HK</span>
+          <span class="p-desc">港元货币ETF</span>
+        </div><div class="p-row">
+          <span class="p-name">货币ETF(人民币)</span>
+          <span class="p-code">3122.HK</span>
+          <span class="p-desc">人民币货币ETF</span>
+        </div><div class="p-row">
+          <span class="p-name">货币ETF(美元)</span>
+          <span class="p-code">3096.HK</span>
+          <span class="p-desc">美元货币市场ETF</span>
+        </div>
+  </div>
+</div><div class="region-card">
+  <div class="region-header" style="border-left:4px solid #8b5cf6">
+    <span class="region-icon">🏠</span>
+    <div>
+      <div class="region-name">🏠 REITs</div>
+      <div class="region-desc">亚太房地产信托收益</div>
+    </div>
+  </div>
+  <div class="region-products">
+    <div class="p-row">
+          <span class="p-name">亚太REITs</span>
+          <span class="p-code">3447.HK</span>
+          <span class="p-desc">亚太房地产信托ETF</span>
+        </div><div class="p-row">
+          <span class="p-name">新加坡REITs</span>
+          <span class="p-code">SRT.SP</span>
+          <span class="p-desc">新加坡房地产信托ETF</span>
+        </div>
+  </div>
+</div><div class="region-card">
+  <div class="region-header" style="border-left:4px solid #f97316">
+    <span class="region-icon">₿</span>
+    <div>
+      <div class="region-name">₿ 加密货币</div>
+      <div class="region-desc">比特币、以太币期货及杠杆产品</div>
+    </div>
+  </div>
+  <div class="region-products">
+    <div class="p-row">
+          <span class="p-name">比特币期货</span>
+          <span class="p-code">3066.HK</span>
+          <span class="p-desc">比特币期货ETF</span>
+        </div><div class="p-row">
+          <span class="p-name">以太币期货</span>
+          <span class="p-code">3068.HK</span>
+          <span class="p-desc">以太币期货ETF</span>
+        </div><div class="p-row">
+          <span class="p-name">做空比特币期货</span>
+          <span class="p-code">7376.HK</span>
+          <span class="p-desc">1倍做空比特币期货</span>
+        </div>
+  </div>
+</div><div class="region-card">
+  <div class="region-header" style="border-left:4px solid #ef4444">
+    <span class="region-icon">📈</span>
+    <div>
+      <div class="region-name">📈 指数杠反</div>
+      <div class="region-desc">2倍/1倍做多或做空主要指数</div>
+    </div>
+  </div>
+  <div class="region-products">
+    <div class="p-row">
+          <span class="p-name">2x做多恒生科技</span>
+          <span class="p-code">7226.HK</span>
+          <span class="p-desc">南方2倍做多恒生科技</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做空恒生科技</span>
+          <span class="p-code">7552.HK</span>
+          <span class="p-desc">南方2倍做空恒生科技</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做多恒指</span>
+          <span class="p-code">7200.HK</span>
+          <span class="p-desc">南方2倍做多恒生</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做空恒指</span>
+          <span class="p-code">7500.HK</span>
+          <span class="p-desc">南方2倍做空恒生</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做多恒企</span>
+          <span class="p-code">7288.HK</span>
+          <span class="p-desc">南方2倍做多恒企</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做空恒企</span>
+          <span class="p-code">7588.HK</span>
+          <span class="p-desc">南方2倍做空恒企</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做多纳指100</span>
+          <span class="p-code">7266.HK</span>
+          <span class="p-desc">南方2倍做多纳指100</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做空纳指100</span>
+          <span class="p-code">7568.HK</span>
+          <span class="p-desc">南方2倍做空纳指100</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做多日经225</span>
+          <span class="p-code">7262.HK</span>
+          <span class="p-desc">南方2倍做多日经225</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做空日经225</span>
+          <span class="p-code">7515.HK</span>
+          <span class="p-desc">南方2倍做空日经225</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做多沪深300</span>
+          <span class="p-code">7233.HK</span>
+          <span class="p-desc">南方2倍做多沪深300</span>
+        </div><div class="p-row">
+          <span class="p-name">1x做空恒生</span>
+          <span class="p-code">7300.HK</span>
+          <span class="p-desc">南方1倍做空恒生</span>
+        </div>
+  </div>
+</div><div class="region-card">
+  <div class="region-header" style="border-left:4px solid #ec4899">
+    <span class="region-icon">🦄</span>
+    <div>
+      <div class="region-name">🦄 个股杠反</div>
+      <div class="region-desc">2倍做多或做空明星科技股</div>
+    </div>
+  </div>
+  <div class="region-products">
+    <div class="p-row">
+          <span class="p-name">2x做多MSTR</span>
+          <span class="p-code">7799.HK</span>
+          <span class="p-desc">2倍做多MicroStrategy</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做多英伟达</span>
+          <span class="p-code">7788.HK</span>
+          <span class="p-desc">2倍做多英伟达</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做多特斯拉</span>
+          <span class="p-code">7766.HK</span>
+          <span class="p-desc">2倍做多特斯拉</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做多三星</span>
+          <span class="p-code">7747.HK</span>
+          <span class="p-desc">2倍做多三星电子</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做多SK海力士</span>
+          <span class="p-code">7709.HK</span>
+          <span class="p-desc">2倍做多SK海力士</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做多Coinbase</span>
+          <span class="p-code">7711.HK</span>
+          <span class="p-desc">2倍做多Coinbase</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做多BRK</span>
+          <span class="p-code">7777.HK</span>
+          <span class="p-desc">2倍做多Berkshire</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做空MSTR</span>
+          <span class="p-code">7399.HK</span>
+          <span class="p-desc">2倍做空MicroStrategy</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做空英伟达</span>
+          <span class="p-code">7388.HK</span>
+          <span class="p-desc">2倍做空英伟达</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做空特斯拉</span>
+          <span class="p-code">7366.HK</span>
+          <span class="p-desc">2倍做空特斯拉</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做空三星</span>
+          <span class="p-code">7347.HK</span>
+          <span class="p-desc">2倍做空三星电子</span>
+        </div><div class="p-row">
+          <span class="p-name">2x做空Coinbase</span>
+          <span class="p-code">7311.HK</span>
+          <span class="p-desc">2倍做空Coinbase</span>
+        </div>
+  </div>
+</div><div class="region-card">
+  <div class="region-header" style="border-left:4px solid #10b981">
+    <span class="region-icon">💰</span>
+    <div>
+      <div class="region-name">💰 收息神器</div>
+      <div class="region-desc">月月派息/高股息ETF，稳健现金流</div>
+    </div>
+  </div>
+  <div class="region-products">
+    <div class="p-row">
+          <span class="p-name">恒生高息股30</span>
+          <span class="p-code">3466.HK</span>
+          <span class="p-desc">恒生高息股30指数ETF<span class="note-w">⚠️ 月派息</span></span>
+        </div><div class="p-row">
+          <span class="p-name">国指备兑认购(2802)</span>
+          <span class="p-code">2802.HK</span>
+          <span class="p-desc">南方东英国指备兑ETF<span class="note-w">⚠️ 月派息~18%</span></span>
+        </div><div class="p-row">
+          <span class="p-name">GX国指备兑(3416)</span>
+          <span class="p-code">3416.HK</span>
+          <span class="p-desc">GX中国企指备兑ETF<span class="note-w">⚠️ 月派息~16%</span></span>
+        </div><div class="p-row">
+          <span class="p-name">富邦沪深港高股息</span>
+          <span class="p-code">03190.HK</span>
+          <span class="p-desc">富邦沪深港高股息ETF<span class="note-w">⚠️ 年息~6%</span></span>
+        </div><div class="p-row">
+          <span class="p-name">港股通红利</span>
+          <span class="p-code">3469.HK</span>
+          <span class="p-desc">南方港股通红利ETF</span>
+        </div>
+  </div>
+</div>
+</div>
+<div class="footer">
+  数据来源: 产品列表 2026-04-19 · 分类依据: 招标产品清单
+</div>
+</body>
+</html>

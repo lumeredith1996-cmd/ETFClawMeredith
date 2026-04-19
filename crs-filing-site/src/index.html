@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRS境外税算算 — 境外投资税务计算神器</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#f5f6fa;color:#1a1d2e;min-height:100vh;padding-bottom:80px}
+.header{background:linear-gradient(135deg,#1a1d2e 0%,#2d3561 100%);color:#fff;padding:24px 20px 20px}
+.header h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.header p{font-size:12px;opacity:0.7}
+.step-bar{display:flex;gap:6px;margin-top:14px}
+.step{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,0.5)}
+.step.active{color:#fff}
+.step-num{width:20px;height:20px;border-radius:50%;border:1px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:10px}
+.step.active .step-num{background:#10b981;border-color:#10b981;color:#fff}
+.step.done .step-num{background:#10b981;border-color:#10b981;color:#fff}
+.step-line{flex:1;height:1px;background:rgba(255,255,255,0.2);margin:0 4px}
+
+.main{padding:16px 16px}
+.card{background:#fff;border-radius:14px;padding:18px 16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+
+/* Upload Zone */
+.upload-zone{border:2px dashed #d1d5db;border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s}
+.upload-zone:hover{border-color:#3b82f6;background:#f0f7ff}
+.upload-zone.dragover{border-color:#3b82f6;background:#eff6ff}
+.upload-icon{font-size:40px;margin-bottom:12px}
+.upload-zone h3{font-size:15px;margin-bottom:6px}
+.upload-zone p{font-size:12px;color:#9ca3af}
+.upload-zone .formats{font-size:11px;color:#6b7280;margin-top:10px}
+.upload-progress{display:none;margin-top:16px}
+.upload-progress.show{display:block}
+.progress-bar-wrap{height:8px;background:#f0f2f8;border-radius:4px;overflow:hidden;margin-bottom:8px}
+.progress-bar{height:100%;background:linear-gradient(90deg,#3b82f6,#10b981);width:0%;transition:width 0.3s;border-radius:4px}
+.progress-text{font-size:12px;color:#6b7280}
+
+/* File list */
+.file-list{margin-top:14px}
+.file-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8f9fc;border-radius:8px;margin-bottom:8px}
+.file-icon{font-size:22px}
+.file-info{flex:1;min-width:0}
+.file-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-meta{font-size:11px;color:#9ca3af;margin-top:2px}
+.file-status{font-size:11px;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.file-status.done{background:#dcfce7;color:#16a34a}
+.file-status.pending{background:#fef3c7;color:#d97706}
+.file-status.error{background:#fee2e2;color:#dc2626}
+.file-remove{font-size:16px;color:#9ca3af;cursor:pointer;padding:4px}
+
+/* Summary cards */
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.summary-card{padding:14px;border-radius:10px;text-align:center}
+.summary-card.green{background:#f0fdf4;border:1px solid #bbf7d0}
+.summary-card.red{background:#fff5f5;border:1px solid #fecaca}
+.summary-card.blue{background:#eff6ff;border:1px solid #bfdbfe}
+.summary-card .num{font-size:22px;font-weight:700}
+.summary-card.green .num{color:#16a34a}
+.summary-card.red .num{color:#dc2626}
+.summary-card.blue .num{color:#2563eb}
+.summary-card .label{font-size:11px;color:#6b7280;margin-top:4px}
+.summary-divider{grid-column:1/-1;display:flex;align-items:center;gap:10px;font-size:12px;color:#9ca3af}
+.summary-divider::before,.summary-divider::after{content:'';flex:1;height:1px;background:#e5e7eb}
+
+/* Tax result */
+.tax-result{margin-top:12px}
+.tax-year{font-size:14px;font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f0f2f8}
+.tax-year span{font-size:12px;font-weight:400;color:#6b7280;margin-left:8px}
+.region-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f8f9fc;font-size:13px}
+.region-row .region{font-weight:600}
+.region-row .amount{font-family:monospace}
+.tax-total{background:#1a1d2e;color:#fff;border-radius:10px;padding:14px;margin-top:14px}
+.tax-total-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}
+.tax-total-row.final{font-size:16px;font-weight:700;padding-top:10px;margin-top:6px;border-top:1px solid rgba(255,255,255,0.2)}
+
+/* Penalty notice */
+.penalty-notice{background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:12px;margin-top:12px;font-size:12px;color:#92400e}
+.penalty-notice strong{display:block;margin-bottom:4px}
+
+/* Transaction table */
+.tx-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.tx-table th{background:#f0f2f8;color:#6b7280;font-size:10px;padding:6px 8px;text-align:left;font-weight:600}
+.tx-table td{padding:7px 8px;border-bottom:1px solid #f8f9fc}
+.tx-table .type-tag{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px}
+.tx-table .type-BUY{background:#dcfce7;color:#16a34a}
+.tx-table .type-SELL{background:#fee2e2;color:#dc2626}
+.tx-table .type-DIVIDEND{background:#fef3c7;color:#d97706}
+.tx-table .type-INTEREST{background:#eff6ff;color:#2563eb}
+.tx-table .gain{color:#dc2626}
+.tx-table .loss{color:#16a34a}
+.tx-table .mono{font-family:monospace;font-size:11px}
+
+/* Anomaly section */
+.anomaly-item{background:#fff5f5;border:1px solid #fecaca;border-radius:8px;padding:12px;margin-bottom:10px}
+.anomaly-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.anomaly-tag{background:#dc2626;color:#fff;font-size:10px;padding:1px 6px;border-radius:4px}
+.anomaly-desc{font-size:13px;font-weight:600}
+.anomaly-detail{font-size:11px;color:#6b7280;margin-left:auto}
+.anomaly-actions{display:flex;gap:8px;margin-top:8px}
+.btn-sm{padding:5px 14px;border-radius:6px;font-size:12px;border:none;cursor:pointer}
+.btn-confirm{background:#dcfce7;color:#16a34a}
+.btn-reject{background:#fee2e2;color:#dc2626}
+
+/* Buttons */
+.btn-primary{display:block;width:100%;padding:14px;background:linear-gradient(135deg,#1a1d2e,#2d3561);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
+.btn-primary:hover{opacity:0.9}
+.btn-secondary{display:block;width:100%;padding:12px;background:#fff;color:#1a1d2e;border:1px solid #e2e5ef;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;text-align:center}
+.btn-secondary:hover{background:#f0f2f8}
+.btn-group{display:flex;gap:10px;margin-top:10px}
+
+/* Report section */
+.report-download{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.report-card{background:#f8f9fc;border-radius:10px;padding:16px;text-align:center;cursor:pointer;border:1px solid transparent;transition:all 0.15s}
+.report-card:hover{border-color:#3b82f6;background:#eff6ff}
+.report-card .icon{font-size:28px;margin-bottom:8px}
+.report-card .name{font-size:13px;font-weight:600}
+.report-card .desc{font-size:11px;color:#6b7280;margin-top:2px}
+
+/* Disclaimer */
+.disclaimer{background:#f8f9fc;border-radius:10px;padding:14px;font-size:11px;color:#6b7280;line-height:1.6;margin-top:14px}
+.disclaimer strong{color:#1a1d2e}
+
+/* Empty state */
+.empty-state{text-align:center;padding:40px 20px;color:#9ca3af}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
+.empty-state p{font-size:13px}
+
+/* Tab switcher */
+.tab-bar{display:flex;background:#f0f2f8;border-radius:10px;padding:3px;margin-bottom:14px}
+.tab-btn{flex:1;padding:8px;text-align:center;border-radius:8px;font-size:13px;color:#6b7280;cursor:pointer;border:none;background:none;transition:all 0.15s}
+.tab-btn.active{background:#fff;color:#1a1d2e;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+
+/* Hidden sections */
+.hidden{display:none}
+.section-title{font-size:13px;font-weight:700;color:#6b7280;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:12px}
+
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e2e5ef;display:flex;padding:8px 16px;padding-bottom:max(8px,env(safe-area-inset-bottom));gap:8px}
+.bottom-nav .nav-btn{flex:1;padding:10px;text-align:center;border-radius:10px;font-size:12px;cursor:pointer;border:none}
+.nav-btn.upload-nav{background:#1a1d2e;color:#fff;font-weight:600}
+.nav-btn.calc-nav{background:#f0f2f8;color:#6b7280}
+.nav-btn.export-nav{background:#f0f2f8;color:#6b7280}
+
+@media(min-width:600px){
+  .main{max-width:560px;margin:0 auto}
+  .summary-grid{grid-template-columns:repeat(4,1fr)}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>📊 CRS境外税算算</h1>
+  <p>境外投资税务自动计算神器</p>
+  <div class="step-bar">
+    <div class="step active" id="step1"><div class="step-num">1</div>上传</div>
+    <div class="step-line"></div>
+    <div class="step" id="step2"><div class="step-num">2</div>核对</div>
+    <div class="step-line"></div>
+    <div class="step" id="step3"><div class="step-num">3</div>计算</div>
+    <div class="step-line"></div>
+    <div class="step" id="step4"><div class="step-num">4</div>报告</div>
+  </div>
+</header>
+
+<div class="main">
+
+<!-- STEP 1: Upload -->
+<div id="section-upload">
+  <div class="card">
+    <div class="section-title">📤 上传月结单</div>
+    <div class="upload-zone" id="uploadZone">
+      <div class="upload-icon">📄</div>
+      <h3>点击或拖拽上传月结单</h3>
+      <p>支持 PDF、Excel（.xlsx/.xls）格式</p>
+      <div class="formats">支持富途证券、Interactive Brokers 等主流券商格式</div>
+      <input type="file" id="fileInput" accept=".pdf,.xlsx,.xls" multiple style="display:none">
+    </div>
+    <div class="upload-progress" id="uploadProgress">
+      <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="progress-text" id="progressText">正在解析文件...</div>
+    </div>
+    <div class="file-list" id="fileList"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">🧮 税务计算参数</div>
+    <div style="font-size:13px;color:#6b7280;line-height:1.7">
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f2f8">
+        <span>计税范围</span><span style="font-weight:600">已实现收益（卖出盈亏 + 股息 + 利息）</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f2f8">
+        <span>税率</span><span style="font-weight:600">20%</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f2f8">
+        <span>成本计算</span><span style="font-weight:600">移动加权平均法</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f2f8">
+        <span>汇率折算</span><span style="font-weight:600">每年12月31日人民银行中间价</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0">
+        <span>申报年度</span><span style="font-weight:600">2023年度 / 2024年度</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="background:linear-gradient(135deg,#eff6ff,#f0f9ff);border:1px solid #bfdbfe">
+    <div style="font-size:12px;color:#1d4ed8;line-height:1.7">
+      <strong style="font-size:13px">💡 计税说明</strong><br>
+      • 股票浮盈浮亏（未卖出）<strong>不</strong>征税，只对卖出时的实际盈亏征税<br>
+      • 同一年度同一地区账户的盈亏可互抵<br>
+      • 跨年/跨地区账户盈亏<strong>不能</strong>互抵<br>
+      • 净亏损不退税，可结转以后年度弥补<br>
+      • 2023年税款逾期须缴日万分之五滞纳金
+    </div>
+  </div>
+
+  <button class="btn-primary" id="btnParse" onclick="startParsing()" style="margin-top:14px">
+    🔍 开始解析月结单
+  </button>
+</div>
+
+<!-- STEP 2: Review -->
+<div id="section-review" class="hidden">
+  <div class="card">
+    <div class="section-title">🔍 数据核对 (<span id="reviewCount">0</span>笔)</div>
+    <div id="anomalyList"></div>
+    <div id="txList"></div>
+    <div class="btn-group">
+      <button class="btn-secondary" onclick="switchSection('upload')">⬅️ 重新上传</button>
+      <button class="btn-primary" onclick="switchSection('calculate')">✅ 确认并计算 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3: Calculate -->
+<div id="section-calculate" class="hidden">
+  <div class="card">
+    <div class="section-title">📊 计算结果</div>
+    <div class="summary-grid" id="summaryGrid"></div>
+    <div id="penaltyNotice" class="penalty-notice hidden">
+      <strong>⚠️ 滞纳金提醒</strong>
+      <span id="penaltyText"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">📋 分地区明细</div>
+    <div id="taxDetails"></div>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn-secondary" onclick="switchSection('review')">⬅️ 重新核对</button>
+    <button class="btn-primary" onclick="switchSection('report')">📥 生成报告 →</button>
+  </div>
+</div>
+
+<!-- STEP 4: Report -->
+<div id="section-report" class="hidden">
+  <div class="card">
+    <div class="section-title">📥 报告下载</div>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:14px">以下报告包含完整的计算明细，可直接用于CRS申报</p>
+    <div class="report-download">
+      <div class="report-card" onclick="downloadReport('dividend')">
+        <div class="icon">💰</div>
+        <div class="name">股息利息收入报告</div>
+        <div class="desc">年度股息、利息所得明细及计算过程</div>
+      </div>
+      <div class="report-card" onclick="downloadReport('capital')">
+        <div class="icon">📈</div>
+        <div class="name">财产转让所得报告</div>
+        <div class="desc">股票买卖盈亏及完整计算过程</div>
+      </div>
+      <div class="report-card" onclick="downloadReport('summary')">
+        <div class="icon">📋</div>
+        <div class="name">CRS申报汇总表</div>
+        <div class="desc">两年汇总及税额计算结果</div>
+      </div>
+      <div class="report-card" onclick="downloadReport('workpaper')">
+        <div class="icon">🗂️</div>
+        <div class="name">完整工作底稿</div>
+        <div class="desc">全部交易明细及计算底稿（Excel）</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="disclaimer">
+      <strong>⚠️ 免责声明</strong><br>
+      本工具仅作为计算辅助参考，不构成税务建议。计算结果须经持牌税务师审核确认后方可用于正式申报。汇率数据、滞纳金规定等可能因政策调整而变化，请以税务机关最新要求为准。
+    </div>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn-secondary" onclick="switchSection('calculate')">⬅️ 返回计算结果</button>
+    <button class="btn-primary" onclick="resetAll()">🔄 新建计算</button>
+  </div>
+</div>
+
+</div>
+
+<script type="module">
+// Import calculation engine (inline for simplicity)
+import { runMockCalculation, aggregateByYearAndRegion, generateReport, calcLatePenalty } from './app.js';
+
+// ===== State =====
+let uploadedFiles = [];
+let parsedData = { 2023: {}, 2024: {} };
+let anomalies = [];
+
+// ===== Upload handling =====
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+function handleFiles(files) {
+  for (const f of files) {
+    if (!f.name.match(/\.(pdf|xlsx?|xls)$/i)) continue;
+    const id = Date.now() + Math.random();
+    uploadedFiles.push({ id, name: f.name, size: f.size, status: 'pending', data: null });
+    renderFileList();
+  }
+}
+
+function renderFileList() {
+  const el = document.getElementById('fileList');
+  el.innerHTML = uploadedFiles.map(f => {
+    const sizeStr = f.size > 1024*1024 ? (f.size/1024/1024).toFixed(1)+'MB' : (f.size/1024).toFixed(0)+'KB';
+    const statusIcon = f.status === 'done' ? '✅' : f.status === 'error' ? '❌' : '⏳';
+    return `<div class="file-item" id="file-${f.id}">
+      <div class="file-icon">${f.name.endsWith('.pdf') ? '📑' : '📊'}</div>
+      <div class="file-info">
+        <div class="file-name">${f.name}</div>
+        <div class="file-meta">${sizeStr} · ${new Date().toLocaleDateString('zh-CN')}</div>
+      </div>
+      <span class="file-status ${f.status}">${statusIcon}</span>
+      <span class="file-remove" onclick="removeFile(${f.id})">✕</span>
+    </div>`;
+  }).join('');
+}
+
+function removeFile(id) {
+  uploadedFiles = uploadedFiles.filter(f => f.id !== id);
+  renderFileList();
+}
+
+// ===== Mock parsing =====
+async function startParsing() {
+  if (uploadedFiles.length === 0) {
+    alert('请先上传月结单文件');
+    return;
+  }
+  
+  const progress = document.getElementById('uploadProgress');
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  progress.classList.add('show');
+  
+  // Simulate parsing progress
+  for (let i = 0; i <= 100; i += 10) {
+    progressBar.style.width = i + '%';
+    progressText.textContent = `正在解析... ${i}%`;
+    await new Promise(r => setTimeout(r, 150));
+  }
+  
+  // Mark all as done
+  uploadedFiles.forEach(f => f.status = 'done');
+  progressText.textContent = '解析完成！';
+  renderFileList();
+  
+  // Simulate extracted data (mock)
+  const { report } = runMockCalculation();
+  renderResults(report);
+  switchSection('calculate');
+}
+
+// ===== Render results =====
+function renderResults(report) {
+  const grid = document.getElementById('summaryGrid');
+  
+  // 2023 data
+  const d23 = report['2023'];
+  const d24 = report['2024'];
+  
+  grid.innerHTML = `
+    <div class="summary-card blue"><div class="num">¥${d23.totalTaxable || '0.00'}</div><div class="label">2023应税所得</div></div>
+    <div class="summary-card green"><div class="num">¥${d23.totalTaxDue || '0.00'}</div><div class="label">2023应缴税额</div></div>
+    <div class="summary-card blue"><div class="num">¥${d24.totalTaxable || '0.00'}</div><div class="label">2024应税所得</div></div>
+    <div class="summary-card green"><div class="num">¥${d24.totalTaxDue || '0.00'}</div><div class="label">2024应缴税额</div></div>
+    <div class="summary-divider">滞纳金（如有）</div>
+    <div class="summary-card red"><div class="num">¥${d23.totalPenalty || '0.00'}</div><div class="label">2023滞纳金</div></div>
+    <div class="summary-card red"><div class="num">¥${d24.totalPenalty || '0.00'}</div><div class="label">2024滞纳金</div></div>
+  `;
+  
+  // Penalty notice
+  const penaltyEl = document.getElementById('penaltyNotice');
+  const penaltyText = document.getElementById('penaltyText');
+  const totalPenalty23 = parseFloat(d23.totalPenalty || 0);
+  const totalPenalty24 = parseFloat(d24.totalPenalty || 0);
+  
+  if (totalPenalty23 > 0 || totalPenalty24 > 0) {
+    penaltyEl.classList.remove('hidden');
+    penaltyText.textContent = `2023年度税款自2024年7月1日起按日万分之五计算滞纳金，合计约 ¥${totalPenalty23.toFixed(2)}。请尽快申报缴纳。`;
+  }
+  
+  // Region details
+  const detailsEl = document.getElementById('taxDetails');
+  let detailsHTML = '';
+  for (const year of ['2023', '2024']) {
+    const d = report[year];
+    if (!d || !d.regions) continue;
+    detailsHTML += `<div class="tax-year">${year}年度<span>（人民币元）</span></div>`;
+    for (const [region, amt] of Object.entries(d.regions)) {
+      detailsHTML += `
+        <div class="region-row">
+          <span class="region">${region === 'HK' ? '🇭🇰 香港账户' : region === 'US' ? '🇺🇸 美国账户' : region}</span>
+          <span class="amount" style="color:#dc2626;font-weight:700">¥${parseFloat(amt.taxDue || 0).toFixed(2)}</span>
+        </div>
+        <div class="region-row" style="font-size:11px;color:#6b7280">
+          <span>股息+利息</span><span>¥${parseFloat(amt.dividends||0).toFixed(2)} + ¥${parseFloat(amt.interest||0).toFixed(2)}</span>
+        </div>
+        <div class="region-row" style="font-size:11px;color:#6b7280">
+          <span>财产转让所得</span><span>¥${parseFloat(amt.realizedGains||0).toFixed(2)} (损 ¥${parseFloat(amt.realizedLosses||0).toFixed(2)})</span>
+        </div>
+      `;
+    }
+    detailsHTML += `<div class="region-row" style="background:#f0f2f8;border-radius:6px;padding:10px 8px;margin-top:4px">
+      <span style="font-weight:700">${year}年度小计</span>
+      <span style="font-weight:700;color:#dc2626">¥${(parseFloat(d.totalTaxDue||0)+parseFloat(d.totalPenalty||0)).toFixed(2)}</span>
+    </div>`;
+  }
+  detailsEl.innerHTML = detailsHTML;
+}
+
+// ===== Navigation =====
+window.switchSection = function(section) {
+  document.querySelectorAll('[id^="section-"]').forEach(el => el.classList.add('hidden'));
+  document.getElementById('section-' + section).classList.remove('hidden');
+  
+  const steps = ['upload', 'review', 'calculate', 'report'];
+  const idx = steps.indexOf(section);
+  steps.forEach((s, i) => {
+    const el = document.getElementById('step' + (i+1));
+    el.classList.remove('active', 'done');
+    if (i < idx) el.classList.add('done');
+    if (i === idx) el.classList.add('active');
+  });
+};
+
+window.resetAll = function() {
+  uploadedFiles = [];
+  renderFileList();
+  switchSection('upload');
+  document.getElementById('uploadProgress').classList.remove('show');
+  document.getElementById('progressBar').style.width = '0%';
+};
+
+window.downloadReport = function(type) {
+  const names = {
+    dividend: '年度股息利息收入报告',
+    capital: '年度财产转让所得计算报告', 
+    summary: 'CRS申报汇总表',
+    workpaper: '完整工作底稿',
+  };
+  alert('📄 ' + names[type] + ' 即将生成下载\n\n（完整版需接入后端Excel生成引擎）');
+  console.log('Download report:', type);
+};
+
+// Init with demo data on load
+window.addEventListener('DOMContentLoaded', () => {
+  // Pre-populate with demo files for illustration
+});
+</script>
+
+</body>
+</html>

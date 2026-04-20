@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>基金KOL动态时间轴</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e3e4e8; min-height: 100vh; }
+a { color: inherit; text-decoration: none; }
+.header { background: linear-gradient(135deg, #1a1d27 0%, #11141c 100%); padding: 22px 32px; border-bottom: 1px solid #232738; }
+.header h1 { font-size: 21px; font-weight: 600; color: #fff; margin-bottom: 3px; }
+.header p { font-size: 12px; color: #6b7280; }
+.stats { display: flex; gap: 14px; margin-top: 14px; flex-wrap: wrap; }
+.stat-box { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 10px; padding: 9px 16px; min-width: 100px; }
+.stat-box .num { font-size: 20px; font-weight: 700; }
+.stat-box .label { font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.num-hi { color: #f59e0b; } .num-me { color: #3b82f6; } .num-lo { color: #6b7280; } .num-koc { color: #10b981; }
+.banner { background: linear-gradient(90deg, #8b5cf6, #6366f1); padding: 7px 32px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 11px; color: #e0d7ff; }
+.banner strong { color: #fff; }
+.banner-sep { width: 1px; height: 14px; background: rgba(255,255,255,0.3); }
+.filter-bar { padding: 12px 32px; background: #13151e; border-bottom: 1px solid #1e2130; display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+.fbtn { padding: 4px 11px; border-radius: 14px; border: 1px solid #2a2d3a; background: transparent; color: #9ca3af; font-size: 11px; cursor: pointer; transition: all 0.15s; }
+.fbtn:hover { border-color: #3b82f6; color: #3b82f6; }
+.fbtn.active { background: #3b82f6; border-color: #3b82f6; color: #fff; }
+.fbtn.hi.active { background: #f59e0b; border-color: #f59e0b; }
+.fbtn.me.active { background: #3b82f6; border-color: #3b82f6; }
+.fbtn.lo.active { background: #4b5563; border-color: #4b5563; }
+.fbtn.koc.active { background: #10b981; border-color: #10b981; }
+.fbtn.sx.active { background: #6366f1; border-color: #6366f1; }
+.fbtn.all-btn.active { background: #8b5cf6; border-color: #8b5cf6; }
+.sep { width: 1px; height: 18px; background: #2a2d3a; margin: 0 3px; }
+.refresh-btn { margin-left: auto; padding: 4px 13px; background: #8b5cf6; border: none; border-radius: 14px; color: #fff; font-size: 11px; cursor: pointer; }
+.refresh-btn:hover { background: #7c3aed; }
+.last-updated { font-size: 10px; color: #3d4250; margin-left: 8px; white-space: nowrap; }
+.timeline { padding: 20px 32px; max-width: 840px; margin: 0 auto; }
+.tl-item { display: flex; opacity: 1; transition: opacity 0.3s; }
+.tl-item.hidden { display: none; }
+.tl-time-col { width: 64px; text-align: right; padding-top: 11px; flex-shrink: 0; padding-right: 12px; }
+.tl-time { font-size: 11px; color: #6b7280; line-height: 1.3; font-weight: 500; }
+.tl-date { font-size: 10px; color: #3d4250; margin-top: 2px; }
+.tl-line-col { width: 22px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
+.tl-dot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid #0f1117; margin-top: 9px; flex-shrink: 0; }
+.tl-dot.hi { background: #f59e0b; } .tl-dot.me { background: #3b82f6; } .tl-dot.lo { background: #6b7280; } .tl-dot.koc { background: #10b981; }
+.tl-line { width: 2px; background: #2a2d3a; flex: 1; min-height: 50px; }
+.tl-line.hi { background: linear-gradient(to bottom, #f59e0b60, #f59e0b20); } .tl-line.me { background: linear-gradient(to bottom, #3b82f660, #3b82f620); }
+.tl-card { background: #1a1d27; border: 1px solid #232738; border-radius: 11px; padding: 11px 13px; flex: 1; margin: 7px 0 7px 10px; min-width: 0; }
+.tl-card:hover { border-color: #2e3148; }
+.tl-card.hi { border-left: 2px solid #f59e0b50; } .tl-card.me { border-left: 2px solid #3b82f650; }
+.tl-card.lo { border-left: 2px solid #6b728030; } .tl-card.koc { border-left: 2px solid #10b98130; }
+.tl-card-head { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; flex-wrap: wrap; }
+.tl-avatar { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.avatar-hi { background: linear-gradient(135deg, #f59e0b, #ef4444); } .avatar-me { background: linear-gradient(135deg, #3b82f6, #6366f1); }
+.avatar-lo { background: linear-gradient(135deg, #6b7280, #374151); } .avatar-koc { background: linear-gradient(135deg, #10b981, #059669); }
+.tl-name { font-size: 13px; font-weight: 600; color: #e3e4e8; }
+.tl-rank { font-size: 9px; padding: 1px 6px; border-radius: 7px; font-weight: 600; flex-shrink: 0; }
+.rank-hi { background: #f59e0b18; color: #f59e0b; border: 1px solid #f59e0b30; } .rank-me { background: #3b82f618; color: #3b82f6; border: 1px solid #3b82f630; }
+.rank-lo { background: #6b728018; color: #6b7280; border: 1px solid #6b728030; } .rank-koc { background: #10b98118; color: #10b981; border: 1px solid #10b98130; }
+.plat-tag { display: inline-flex; align-items: center; gap: 2px; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-left: auto; flex-shrink: 0; }
+.pt-xueqiu { background: #ff6b3518; color: #ff6b35; } .pt-weibo { background: #ff820018; color: #ff8200; }
+.pt-gzh { background: #1677ff18; color: #1677ff; } .pt-xhs { background: #ff500018; color: #fa4d32; }
+.pt-zfb { background: #1677ff18; color: #1677ff; } .pt-bili { background: #00ade118; color: #00ade1; }
+.pt-youtube { background: #ff000018; color: #ff4444; } .pt-wx { background: #07c16018; color: #07c160; }
+.pt-ths { background: #de1f4418; color: #de1f44; } .pt-def { background: #6366f118; color: #6366f1; }
+.tl-content { font-size: 12.5px; color: #b8bdc9; line-height: 1.55; }
+.tl-tags { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+.tl-tag { font-size: 10px; padding: 2px 7px; border-radius: 5px; background: #232738; color: #8b95a5; white-space: nowrap; }
+.tl-note { font-size: 10.5px; color: #3d4250; margin-top: 5px; line-height: 1.4; }
+.tl-products { font-size: 10px; color: #f59e0b80; margin-top: 4px; }
+.tl-meta { display: flex; gap: 10px; margin-top: 6px; font-size: 10px; color: #3d4250; flex-wrap: wrap; }
+.tl-meta span { display: flex; align-items: center; gap: 2px; }
+.tl-social { font-size: 10px; color: #3d4250; margin-top: 3px; }
+.tl-private { font-size: 10px; color: #10b98180; margin-top: 2px; }
+.empty-state { text-align: center; padding: 60px 20px; color: #4b5563; }
+.empty-state .icon { font-size: 40px; margin-bottom: 10px; }
+.empty-state p { font-size: 13px; }
+.nodata { text-align: center; padding: 32px; color: #3d4250; font-size: 12px; }
+.demo-note { text-align: center; padding: 6px; background: #13151e; font-size: 10px; color: #3d4250; border-bottom: 1px solid #1e2130; }
+.demo-note strong { color: #8b5cf6; }
+.loading { text-align: center; padding: 60px; color: #6b7280; font-size: 13px; }
+@media (max-width: 600px) { .header, .filter-bar, .timeline, .banner { padding-left: 16px; padding-right: 16px; } .tl-time-col { width: 48px; } }
+</style>
+</head>
+<body>
+<div class="demo-note">📋 数据来源：飞书「KOL List (Onshore)」内地KOL汇总表 &nbsp;|&nbsp; 共 <strong id="totalKOL">--</strong> 位大V &nbsp;|&nbsp; High/Medium/Low/KOC 分级</div>
+<header class="header">
+  <h1>📈 基金KOL动态时间轴</h1>
+  <p>追踪内地基金/港美股投资领域大V · 实时聚合多平台发布</p>
+  <div class="stats">
+    <div class="stat-box"><div class="num num-hi" id="cntHigh">-</div><div class="label">High</div></div>
+    <div class="stat-box"><div class="num num-me" id="cntMed">-</div><div class="label">Medium</div></div>
+    <div class="stat-box"><div class="num num-lo" id="cntLo">-</div><div class="label">Low</div></div>
+    <div class="stat-box"><div class="num num-koc" id="cntKoc">-</div><div class="label">KOC</div></div>
+    <div class="stat-box"><div class="num" id="cntTotal">-</div><div class="label">KOL总数</div></div>
+    <div class="stat-box"><div class="num" id="cntPosts">-</div><div class="label">动态条目</div></div>
+  </div>
+</header>
+<div class="banner">
+  <span>📋 真实数据：飞书「KOL List (Onshore)」内地KOL汇总表</span>
+  <div class="banner-sep"></div>
+  <span>共 <strong id="bannerKol">--</strong> 位大V</span>
+  <div class="banner-sep"></div>
+  <span>当前显示 <strong id="bannerShow">--</strong> 条</span>
+  <div class="banner-sep"></div>
+  <span>最后更新：<span id="lastUpdated">加载中...</span></span>
+</div>
+<div class="filter-bar">
+  <span style="font-size:10px;color:#4b5563">咖位:</span>
+  <button class="fbtn all-btn active" data-filter="all">全部</button>
+  <button class="fbtn hi" data-filter="High">High</button>
+  <button class="fbtn me" data-filter="Medium">Medium</button>
+  <button class="fbtn lo" data-filter="Low">Low</button>
+  <button class="fbtn koc" data-filter="Koc">KOC</button>
+  <div class="sep"></div>
+  <span style="font-size:10px;color:#4b5563">平台:</span>
+  <button class="fbtn sx active" data-platform="all">全部</button>
+  <button class="fbtn sx" data-platform="雪球">雪球</button>
+  <button class="fbtn sx" data-platform="微信公众号">公众号</button>
+  <button class="fbtn sx" data-platform="微博">微博</button>
+  <button class="fbtn sx" data-platform="小红书">小红书</button>
+  <button class="fbtn sx" data-platform="支付宝">支付宝</button>
+  <button class="fbtn sx" data-platform="B站">B站</button>
+  <button class="fbtn sx" data-platform="微信视频号">视频号</button>
+  <button class="fbtn sx" data-platform="同花顺">同花顺</button>
+  <button class="refresh-btn" onclick="refreshData()">🔄 刷新</button>
+  <span class="last-updated" id="updateTime"></span>
+</div>
+<div class="timeline" id="timeline"><div class="loading">⏳ 加载数据中...</div></div>
+<script>
+let KOLS = [];
+let FEED = [];
+let curFilter = 'all';
+let curPlatform = 'all';
+
+function init() {
+  fetch('kol_feed_rich.json')
+    .then(r => r.json())
+    .then(data => {
+      KOLS = data.kols;
+      FEED = data.feed;
+      const high = KOLS.filter(k=>k.r==='High').length;
+      const med = KOLS.filter(k=>k.r==='Medium').length;
+      const lo = KOLS.filter(k=>k.r==='Low').length;
+      const koc = KOLS.filter(k=>k.r==='Koc').length;
+      document.getElementById('cntHigh').textContent = high;
+      document.getElementById('cntMed').textContent = med;
+      document.getElementById('cntLo').textContent = lo;
+      document.getElementById('cntKoc').textContent = koc;
+      document.getElementById('cntTotal').textContent = KOLS.length;
+      document.getElementById('cntPosts').textContent = FEED.length;
+      document.getElementById('bannerKol').textContent = KOLS.length;
+      document.getElementById('totalKOL').textContent = KOLS.length;
+      document.getElementById('lastUpdated').textContent = new Date().toLocaleString('zh-CN');
+      document.getElementById('updateTime').textContent = '更新: ' + new Date().toLocaleTimeString('zh-CN');
+      renderTimeline();
+      setupFilters();
+    })
+    .catch(e => {
+      document.getElementById('timeline').innerHTML = '<div class="nodata">数据加载失败: '+e.message+'</div>';
+    });
+}
+
+function setupFilters() {
+  document.querySelectorAll('.fbtn[data-filter]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.fbtn[data-filter]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      curFilter = btn.dataset.filter;
+      renderTimeline();
+    });
+  });
+  document.querySelectorAll('.fbtn[data-platform]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.fbtn[data-platform]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      curPlatform = btn.dataset.platform;
+      renderTimeline();
+    });
+  });
+}
+
+function platClass(p) {
+  if(p==='雪球') return 'pt-xueqiu';
+  if(p==='微博') return 'pt-weibo';
+  if(p==='微信公众号'||p==='公众号') return 'pt-gzh';
+  if(p==='小红书') return 'pt-xhs';
+  if(p==='支付宝') return 'pt-zfb';
+  if(p==='B站') return 'pt-bili';
+  if(p==='微信视频号'||p==='视频号') return 'pt-wx';
+  if(p==='Youtube') return 'pt-youtube';
+  if(p==='同花顺') return 'pt-ths';
+  if(p==='知识星球') return 'pt-def';
+  return 'pt-def';
+}
+
+function dot(r) { if(r==='High') return 'hi'; if(r==='Medium') return 'me'; if(r==='Koc') return 'koc'; return 'lo'; }
+function avatar(r) { if(r==='High') return 'avatar-hi'; if(r==='Medium') return 'avatar-me'; if(r==='Koc') return 'avatar-koc'; return 'avatar-lo'; }
+function card(r) { if(r==='High') return 'hi'; if(r==='Medium') return 'me'; if(r==='Koc') return 'koc'; return 'lo'; }
+function line(r) { if(r==='High') return 'hi'; if(r==='Medium') return 'me'; return ''; }
+
+function fmtTime(ts) {
+  const d = new Date(ts*1000);
+  const now = new Date();
+  const diff = (now-d)/1000;
+  if(diff < 3600) return Math.floor(diff/60) + '分钟前';
+  if(diff < 86400) return Math.floor(diff/3600) + '小时前';
+  return (d.getMonth()+1) + '/' + d.getDate() + ' ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+}
+
+function fmtDate(ts) {
+  const d = new Date(ts*1000);
+  return d.getFullYear() + '-' + (d.getMonth()+1).toString().padStart(2,'0') + '-' + d.getDate().toString().padStart(2,'0');
+}
+
+function getInitials(name) { return name.slice(0,2); }
+
+function renderTimeline() {
+  const filtered = FEED.filter(f => {
+    const matchRank = curFilter === 'all' || f.rating === curFilter;
+    const matchPlat = curPlatform === 'all' || f.platform === curPlatform;
+    return matchRank && matchPlat;
+  });
+
+  document.getElementById('bannerShow').textContent = filtered.length;
+
+  if(filtered.length === 0) {
+    document.getElementById('timeline').innerHTML = '<div class="nodata">暂无符合条件的动态</div>';
+    return;
+  }
+
+  let html = '';
+  filtered.forEach(item => {
+    const r = item.rating || 'Low';
+    const d = dot(r);
+    const av = avatar(r);
+    const cc = card(r);
+    const ln = line(r);
+    const rankLabel = r === 'Koc' ? 'KOC' : r;
+    const platPt = platClass(item.platform);
+    const tags = item.tags.slice(0, 8).map(t=>'<span class="tl-tag">'+t+'</span>').join('');
+    const note = item.note ? '<div class="tl-note">'+item.note+'</div>' : '';
+    const products = item.products ? '<div class="tl-products">🏷️ 已合作: '+item.products+'</div>' : '';
+    const loc = item.loc ? '<span>📍'+item.loc+'</span>' : '';
+    const coop = item.coop ? '<span style="color:#10b981">'+item.coop+'</span>' : '';
+    const social = item.social ? '<span>👥'+item.social+'</span>' : '';
+    const private_size = item.private ? '<span>💬'+item.private+'</span>' : '';
+    const broker = item.broker ? '<span>🏦'+item.broker+'</span>' : '';
+    const invest = item.invest ? '<span>📊'+item.invest+'</span>' : '';
+    const metaParts = [loc, coop, social, private_size, broker, invest].filter(Boolean);
+    const metaHtml = metaParts.length ? '<div class="tl-meta">'+metaParts.join('')+'</div>' : '';
+
+    html += '<div class="tl-item">';
+    html += '<div class="tl-time-col"><div class="tl-time">'+fmtTime(item.time)+'</div><div class="tl-date">'+fmtDate(item.time)+'</div></div>';
+    html += '<div class="tl-line-col"><div class="tl-dot '+d+'"></div><div class="tl-line '+ln+'"></div></div>';
+    html += '<div class="tl-card '+cc+'">';
+    html += '<div class="tl-card-head">';
+    html += '<div class="tl-avatar '+av+'">'+getInitials(item.kol)+'</div>';
+    html += '<div class="tl-name">'+item.kol+'</div>';
+    html += '<span class="tl-rank rank-'+d+'">'+rankLabel+'</span>';
+    html += '<span class="plat-tag '+platPt+'">'+item.platform+'</span>';
+    html += '</div>';
+    html += '<div class="tl-content">'+item.content+'</div>';
+    if(tags) html += '<div class="tl-tags">'+tags+'</div>';
+    html += metaHtml;
+    html += note + products;
+    html += '</div></div>';
+  });
+
+  document.getElementById('timeline').innerHTML = html;
+}
+
+function refreshData() {
+  document.getElementById('updateTime').textContent = '更新: ' + new Date().toLocaleTimeString('zh-CN');
+  document.getElementById('lastUpdated').textContent = new Date().toLocaleString('zh-CN');
+  renderTimeline();
+}
+
+init();
+</script>
+</body>
+</html>

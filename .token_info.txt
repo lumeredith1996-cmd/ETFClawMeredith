@@ -1,0 +1,4 @@
+access_token expires_at: 1776230186 → 2026-04-15 13:16:26
+refresh_token expires_at: 1778818586 → 2026-05-15 12:16:26
+Refresh token lifetime: 30.0 days
+Access token lifetime: 719.0 hours

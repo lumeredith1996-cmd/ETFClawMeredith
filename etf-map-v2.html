@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全球ETF投资地图</title>
+<style>
+:root{
+  --bg:#f5f6fa;
+  --card:#ffffff;
+  --card2:#f0f2f8;
+  --border:#e2e5ef;
+  --text:#1a1d2e;
+  --dim:#8892a8;
+  --green:#22c55e;
+  --red:#ef4444;
+  --orange:#f97316;
+  --blue:#3b82f6;
+  --gold:#eab308;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:#ffffff;border-bottom:2px solid #e2e5ef;border-bottom:1px solid var(--border);padding:0 40px;display:flex;justify-content:space-between;align-items:center;height:64px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:700}
+.logo span{color:var(--orange)}
+.tag{background:var(--orange);color:#000;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.5px}
+.top-right{display:flex;align-items:center;gap:16px}
+.upd{font-size:12px;color:var(--dim)}
+.lt{width:8px;height:8px;border-radius:50%;background:#22c55e;animation:pl 2s infinite}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.3}}
+.st{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--dim)}
+.tabs{display:flex;padding:0 40px;background:var(--card);border-bottom:1px solid var(--border)}
+.ta{padding:14px 28px;cursor:pointer;font-size:14px;color:var(--dim);border-bottom:2px solid transparent;transition:.2s;display:flex;align-items:center;gap:7px;font-weight:500}
+.ta:hover{color:var(--text)}
+.ta.ac{color:var(--orange);border-bottom-color:var(--orange)}
+.ta svg{width:16px;height:16px;flex-shrink:0}
+.mn{padding:28px 40px;max-width:1400px;margin:0 auto}
+.pn{display:none}
+.pn.ac{display:block}
+.sts{display:flex;gap:14px;margin-bottom:28px;flex-wrap:wrap}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);padding:16px 24px;min-width:160px;flex:1}
+.sc .lb{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.sc .vl{font-size:30px;font-weight:800}
+.vg{color:var(--green)}.vr{color:var(--red)}.vo{color:var(--orange)}.vb2{color:var(--blue)}
+.sec-title{font-size:16px;font-weight:700;margin-bottom:16px;padding-left:14px;border-left:3px solid var(--orange);display:flex;align-items:center;justify-content:space-between}
+.sec-title span{font-size:12px;color:var(--dim);font-weight:400}
+.tbl{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow:hidden;margin-bottom:32px}
+.tbl table{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;padding:14px 18px;background:#f8f9fc;color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.8px;font-weight:600;border-bottom:1px solid var(--border)}
+.tbl td{padding:14px 18px;border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#12192a}
+.tbl .ch-name{font-weight:700;font-size:14px}
+.tbl .ch-sub{font-size:11px;color:var(--dim);margin-top:2px}
+.stars{color:var(--gold);letter-spacing:1px}
+.tag-green{display:inline-block;background:rgba(62,207,142,.15);color:var(--green);font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
+.tag-orange{display:inline-block;background:rgba(255,159,28,.15);color:var(--orange);font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
+.tag-red{display:inline-block;background:rgba(240,96,96,.15);color:var(--red);font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
+.tag-blue{display:inline-block;background:rgba(74,158,255,.15);color:var(--blue);font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
+.etf-cat{margin-bottom:32px}
+.cat-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;cursor:pointer;user-select:none;padding:10px 0}
+.cat-header h3{font-size:15px;font-weight:700}
+.cat-badge{background:var(--card2);border:1px solid var(--border);color:var(--dim);font-size:11px;padding:2px 8px;border-radius:20px}
+.toggle-icon{color:var(--dim);font-size:12px;transition:transform .2s;margin-left:auto}
+.toggle-icon.open{transform:rotate(180deg)}
+.etf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.etf-card{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);padding:18px;cursor:pointer;transition:.25s;position:relative;overflow:hidden}
+.etf-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--orange),var(--gold));opacity:0;transition:.2s}
+.etf-card:hover{border-color:var(--orange);transform:translateY(-2px)}
+.etf-card:hover::before{opacity:1}
+.etf-card .top-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.etf-card .name{font-size:14px;font-weight:700;line-height:1.3}
+.etf-card .code{font-size:11px;color:var(--dim);margin-top:2px}
+.etf-card .price-block{text-align:right}
+.etf-card .price{font-size:20px;font-weight:800}
+.etf-card .change{font-size:12px;font-weight:600;margin-top:2px}
+.etf-card .meta{display:flex;gap:12px;margin-top:10px;font-size:11px;color:var(--dim);flex-wrap:wrap}
+.etf-card .meta span{display:flex;align-items:center;gap:3px}
+.etf-card .arrow{position:absolute;bottom:14px;right:14px;color:var(--dim);font-size:12px;transition:.2s}
+.etf-card:hover .arrow{color:var(--orange);transform:translateX(3px)}
+.popular-tag{position:absolute;top:12px;right:12px;background:var(--orange);color:#000;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal.open{display:flex}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:900px;max-height:85vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:1}
+.modal-title{font-size:16px;font-weight:700}
+.modal-close{background:var(--card2);border:1px solid var(--border);color:var(--dim);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.modal-close:hover{color:var(--text);border-color:var(--orange)}
+.modal-body{padding:24px}
+.modal-section{margin-bottom:24px}
+.modal-section h4{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.modal-table{width:100%;border-collapse:collapse;font-size:12px;overflow-x:auto;display:block}
+.modal-table table{min-width:600px;width:100%}
+.modal-table th{text-align:left;padding:9px 12px;background:var(--card2);color:var(--dim);font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+.modal-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap}
+.modal-table tr:last-child td{border-bottom:none}
+.modal-table tr:hover td{background:rgba(255,159,28,.04)}
+.index-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+.index-card{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.index-card .iname{font-size:12px;color:var(--dim);margin-bottom:4px}
+.index-card .iprice{font-size:18px;font-weight:700}
+.index-card .ichange{font-size:12px;font-weight:600;margin-top:2px}
+.index-row{display:flex;justify-content:space-between;align-items:center;margin-top:3px;font-size:11px;color:var(--dim)}
+.index-row span:last-child{font-weight:600;color:var(--text)}
+.info-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:14px 18px;font-size:13px;color:var(--dim);line-height:1.7;margin-bottom:24px}
+.info-box strong{color:var(--orange)}
+.research-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.research-card{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);padding:20px;transition:.2s;cursor:pointer}
+.research-card:hover{border-color:var(--orange);transform:translateY(-2px)}
+.rcard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.rcard-date{font-size:11px;color:var(--dim)}
+.rcard-tag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px}
+.tag-research{background:rgba(255,159,28,.15);color:var(--orange)}
+.tag-fund{background:rgba(62,207,142,.15);color:var(--green)}
+.tag-market{background:rgba(74,158,255,.15);color:var(--blue)}
+.rcard-title{font-size:14px;font-weight:700;line-height:1.5;margin-bottom:10px}
+.rcard-summary{font-size:12px;color:var(--dim);line-height:1.6}
+.rcard-footer{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.rcard-source{font-size:11px;color:var(--dim)}
+.flow-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.flow-tab{padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);color:var(--dim);background:var(--card);transition:.2s}
+.flow-tab.ac{background:var(--orange);color:#000;border-color:var(--orange)}
+.flow-table{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow:hidden;margin-bottom:20px}
+.flow-table table{width:100%;border-collapse:collapse;font-size:13px}
+.flow-table th{text-align:left;padding:12px 16px;background:#f0f2f8;color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border)}
+.flow-table td{padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
+.flow-table tr:last-child td{border-bottom:none}
+.flow-rank{font-weight:800;font-size:16px;color:var(--dim);width:40px;text-align:center}
+.flow-name{font-weight:600}
+.flow-code{font-size:11px;color:var(--dim);margin-top:2px}
+.flow-amount{font-weight:700;font-size:14px;text-align:right;white-space:nowrap}
+.flow-in{color:var(--green)}
+.flow-out{color:var(--red)}
+.flow-section{margin-bottom:40px}
+.chip{display:inline-flex;align-items:center;gap:6px;margin-top:12px}
+.chip span{font-size:11px;color:var(--dim);background:var(--card2);padding:4px 10px;border-radius:20px;border:1px solid var(--border)}
+@media(max-width:768px){
+  .header,.tabs{padding:0 16px}
+  .mn{padding:16px}
+  .etf-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">&#x1F30F; 全球ETF投资地图 <span class="tag">BETA</span></div>
+  <div class="top-right">
+    <span class="upd" id="upt"></span>
+    <div class="st"><span class="lt"></span><span>实时行情</span></div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="ta ac" id="tab0" onclick="sw(0)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    投资渠道
+  </div>
+  <div class="ta" id="tab1" onclick="sw(1)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    ETF列表
+  </div>
+  <div class="ta" id="tab2" onclick="sw(2)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    海外机构观点
+  </div>
+  <div class="ta" id="tab3" onclick="sw(3)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    海外聪明钱
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="mn">
+
+  <!-- ========== TAB 0: 投资渠道 ========== -->
+  <div class="pn ac" id="pn0">
+    <div class="sec-title">全球ETF配置方式对比</div>
+    <div class="info-box">
+      以下对比 <strong>四种主流跨境投资渠道</strong>，帮助投资者选择最适合自身情况的入场方式。
+    </div>
+    <div class="tbl">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:160px">渠道</th>
+            <th>投资途径</th>
+            <th>开通条件</th>
+            <th>税收</th>
+            <th style="width:120px">额度</th>
+            <th style="width:90px">便捷</th>
+            <th>适合人群</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <span style="font-size:20px">&#x1F3E6;</span>
+                <div><div class="ch-name">QDII</div><div class="ch-sub">合格境内机构投资者</div></div>
+              </div>
+            </td>
+            <td>A股股票账户</td>
+            <td>只需拥有股票账户</td>
+            <td><span class="tag-red">股息税 20%</span></td>
+            <td><span class="tag-orange">额度受限</span></td>
+            <td><span class="stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</span></td>
+            <td>适合所有投资者</td>
+          </tr>
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <span style="font-size:20px">&#x1F309;</span>
+                <div><div class="ch-name">港股通</div><div class="ch-sub">沪港通 / 深港通</div></div>
+              </div>
+            </td>
+            <td>开通港股通权限</td>
+            <td>股票账户资产 &#x2265;50万</td>
+            <td><span class="tag-red">股息税 20%</span></td>
+            <td><span class="tag-green">含在额度内</span></td>
+            <td><span class="stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</span></td>
+            <td>高净值投资者</td>
+          </tr>
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <span style="font-size:20px">&#x1F310;</span>
+                <div><div class="ch-name">跨境理财通</div><div class="ch-sub">大湾区居民专享</div></div>
+              </div>
+            </td>
+            <td>指定银行办理</td>
+            <td>大湾区居民身份</td>
+            <td><span class="tag-green">暂免所得税</span></td>
+            <td><span class="tag-orange">有限额</span></td>
+            <td><span class="stars">&#x2605;&#x2605;&#x2605;</span></td>
+            <td>大湾区居民</td>
+          </tr>
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <span style="font-size:20px">&#x2708;</span>
+                <div><div class="ch-name">海外直投</div><div class="ch-sub">境外券商开户</div></div>
+              </div>
+            </td>
+            <td>海外券商账户</td>
+            <td>拥有境外银行账户</td>
+            <td><span class="tag-blue">按当地法律</span></td>
+            <td><span class="tag-green">无限制</span></td>
+            <td><span class="stars">&#x2605;&#x2605;&#x2605;</span></td>
+            <td>专业投资者</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sec-title" style="margin-top:8px">各类渠道代表产品</div>
+    <div class="tbl">
+      <table>
+        <thead>
+          <tr>
+            <th>渠道</th>
+            <th>代表产品</th>
+            <th>底层指数</th>
+            <th>今日涨跌幅</th>
+            <th>规模</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag-orange" style="font-size:12px;padding:3px 10px">QDII</span></td>
+            <td><strong>恒生科技ETF</strong> <span style="color:var(--dim);font-size:11px">513130.SH</span></td>
+            <td>恒生科技指数</td>
+            <td id="q-513130" class="vg">+1.97%</td>
+            <td>456亿</td>
+          </tr>
+          <tr>
+            <td><span class="tag-orange" style="font-size:12px;padding:3px 10px">QDII</span></td>
+            <td><strong>亚太精选ETF</strong> <span style="color:var(--dim);font-size:11px">159687.SZ</span></td>
+            <td>富时亚太低碳精选指数</td>
+            <td id="q-159687" class="vg">+1.32%</td>
+            <td>15亿</td>
+          </tr>
+          <tr>
+            <td><span class="tag-orange" style="font-size:12px;padding:3px 10px">QDII</span></td>
+            <td><strong>东南亚科技ETF</strong> <span style="color:var(--dim);font-size:11px">513730.SH</span></td>
+            <td>东南亚科技主题</td>
+            <td id="q-513730" class="vg">+0.80%</td>
+            <td>13亿</td>
+          </tr>
+          <tr>
+            <td><span class="tag-orange" style="font-size:12px;padding:3px 10px">QDII</span></td>
+            <td><strong>沙特ETF</strong> <span style="color:var(--dim);font-size:11px">159329.SZ / 520830.SH</span></td>
+            <td>富时沙特阿拉伯指数</td>
+            <td id="q-159329" class="vr">-0.21%</td>
+            <td>13亿 / 12.7亿</td>
+          </tr>
+          <tr>
+            <td><span class="tag-blue" style="font-size:12px;padding:3px 10px">港股通</span></td>
+            <td><strong>恒生港美科技ETF</strong> <span style="color:var(--dim);font-size:11px">3442.HK</span></td>
+            <td>恒生港美科技指数</td>
+            <td id="q-3442" class="vg">+1.86%</td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td><span class="tag-blue" style="font-size:12px;padding:3px 10px">港股通</span></td>
+            <td><strong>富时东西股票精选ETF</strong> <span style="color:var(--dim);font-size:11px">3441.HK</span></td>
+            <td>富时东西股票精选指数</td>
+            <td id="q-3441" class="vg">+0.34%</td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========== TAB 1: ETF列表 ========== -->
+  <div class="pn" id="pn1">
+    <div class="sec-title">境内可投ETF产品</div>
+    
+    <!-- QDII -->
+    <div class="etf-cat">
+      <div class="cat-header" onclick="toggleCat(this.parentElement)">
+        <h3><span class="tag-orange" style="font-size:12px;padding:3px 10px;margin-right:10px">QDII</span>合格境内机构投资者</h3>
+        <span class="cat-badge">5只产品</span>
+        <span class="toggle-icon open">&#x25BC;</span>
+      </div>
+      <div class="etf-grid">
+        <div class="etf-card" onclick='openModal("恒生科技")'>
+          <div class="popular-tag">热门</div>
+          <div class="top-row">
+            <div>
+              <div class="name">恒生科技ETF</div>
+              <div class="code">513130.SH &#xB7; 华泰柏瑞</div>
+            </div>
+            <div class="price-block">
+              <div class="price" id="c-513130">0.622</div>
+              <div class="change vg" id="cc-513130">+1.97%</div>
+            </div>
+          </div>
+          <div class="meta"><span>&#x1F4CA; 规模456亿</span><span>&#x1F4A7; 日成交313亿</span></div>
+          <div class="arrow">&#x203A;</div>
+        </div>
+        <div class="etf-card" onclick='openModal("亚太精选")'>
+          <div class="top-row">
+            <div>
+              <div class="name">亚太精选ETF</div>
+              <div class="code">159687.SZ &#xB7; 南方基金</div>
+            </div>
+            <div class="price-block">
+              <div class="price" id="c-159687">1.691</div>
+              <div class="change vg" id="cc-159687">+1.32%</div>
+            </div>
+          </div>
+          <div class="meta"><span>&#x1F4CA; 规模15亿</span><span>&#x1F4A7; 日成交6.08亿</span></div>
+          <div class="arrow">&#x203A;</div>
+        </div>
+        <div class="etf-card" onclick='openModal("东南亚科技")'>
+          <div class="top-row">
+            <div>
+              <div class="name">东南亚科技ETF</div>
+              <div class="code">513730.SH &#xB7; 华泰柏瑞</div>
+            </div>
+            <div class="price-block">
+              <div class="price" id="c-513730">1.258</div>
+              <div class="change vg" id="cc-513730">+0.80%</div>
+            </div>
+          </div>
+          <div class="meta"><span>&#x1F4CA; 规模13亿</span><span>&#x1F4A7; 日成交2.58亿</span></div>
+          <div class="arrow">&#x203A;</div>
+        </div>
+        <div class="etf-card" onclick='openModal("沙特")'>
+          <div class="top-row">
+            <div>
+              <div class="name">沙特ETF</div>
+              <div class="code">159329.SZ / 520830.SH</div>
+            </div>
+            <div class="price-block">
+              <div class="price" id="c-159329">0.957</div>
+              <div class="change vr" id="cc-159329">-0.21%</div>
+            </div>
+          </div>
+          <div class="meta"><span>&#x1F4CA; 规模13亿+12.7亿</span><span>&#x1F31F; 双子产品</span></div>
+          <div class="arrow">&#x203A;</div>
+        </div>
+        <div class="etf-card" onclick='openModal("新经济")'>
+          <div class="top-row">
+            <div>
+              <div class="name">新经济ETF</div>
+              <div class="code">159822.SZ &#xB7; 银华基金</div>
+            </div>
+            <div class="price-block">
+              <div class="price" id="c-159822">0.663</div>
+              <div class="change vg" id="cc-159822">+1.69%</div>
+            </div>
+          </div>
+          <div class="meta"><span>&#x1F4CA; 规模2.6亿</span></div>
+          <div class="arrow">&#x203A;</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 港股通 -->
+    <div class="etf-cat">
+      <div class="cat-header" onclick="toggleCat(this.parentElement)">
+        <h3><span class="tag-blue" style="font-size:12px;padding:3px 10px;margin-right:10px">&#x1F30D;</span>香港交易所上市</h3>
+        <span class="cat-badge">港股通可买</span>
+        <span class="toggle-icon open">&#x25BC;</span>
+      </div>
+      <div class="etf-grid">
+        <div class="etf-card" onclick='openModal("恒生港美科技")'>
+          <div class="top-row">
+            <div>
+              <div class="name">恒生港美科技ETF</div>
+              <div class="code">3442.HK</div>
+            </div>
+            <div class="price-block">
+              <div class="price">8.210</div>
+              <div class="change vg">+1.86%</div>
+            </div>
+          </div>
+          <div class="meta"><span>&#x1F4CA; 港美科技指数</span></div>
+          <div class="arrow">&#x203A;</div>
+        </div>
+        <div class="etf-card" onclick='openModal("东西精选")'>
+          <div class="top-row">
+            <div>
+              <div class="name">富时东西股票精选ETF</div>
+              <div class="code">3441.HK</div>
+            </div>
+            <div class="price-block">
+              <div class="price">11.660</div>
+              <div class="change vg">+0.34%</div>
+            </div>
+          </div>
+          <div class="meta"><span>&#x1F4CA; 富时东西股票精选</span></div>
+          <div class="arrow">&#x203A;</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== TAB 2: 海外机构观点 ========== -->
+  <div class="pn" id="pn2">
+    <div class="sec-title">海外机构最新观点 <span>数据来源：CSOP ResearchFlow</span></div>
+    <div class="info-box">
+      汇聚海外资管机构最新研究观点，涵盖宏观策略、行业配置及产品分析。
+      <br><br>
+      <strong>&#x26A0; CSOP ResearchFlow 数据接入：</strong>当前研报内容为示例数据，正式数据获取需要您确认CSOP ResearchFlow账号已登录。
+    </div>
+    <div class="research-grid">
+      <div class="research-card">
+        <div class="rcard-top">
+          <span class="rcard-tag tag-research">策略</span>
+          <span class="rcard-date">2026-04-14</span>
+        </div>
+        <div class="rcard-title">2026年亚太市场配置策略：科技股仍是核心驱动力</div>
+        <div class="rcard-summary">机构认为亚洲科技板块盈利增速仍高于全球平均水平，半导体和AI相关产业链值得超配。韩国和台湾半导体供应链是本轮行情的主要受益者。</div>
+        <div class="rcard-footer"><span class="rcard-source">CSOP Asset Management</span></div>
+      </div>
+      <div class="research-card">
+        <div class="rcard-top">
+          <span class="rcard-tag tag-fund">基金研究</span>
+          <span class="rcard-date">2026-04-12</span>
+        </div>
+        <div class="rcard-title">沙特ETF（159329）季度运作报告：油价支撑与指数表现分析</div>
+        <div class="rcard-summary">沙特阿美股息收益率维持在5%以上，支撑底层指数表现良好。富时沙特指数受益于能源转型投资，经济多元化进程为长期投资者提供安全边际。</div>
+        <div class="rcard-footer"><span class="rcard-source">CSOP Asset Management</span></div>
+      </div>
+      <div class="research-card">
+        <div class="rcard-top">
+          <span class="rcard-tag tag-market">市场</span>
+          <span class="rcard-date">2026-04-10</span>
+        </div>
+        <div class="rcard-title">港股科技板块资金流向分析：南向资金连续净买入</div>
+        <div class="rcard-summary">3月以来南向资金通过港股通持续流入港股科技板块，腾讯、阿里等龙头互联网企业估值仍具吸引力。机构预计港股科技板块二季度盈利增速有望超预期。</div>
+        <div class="rcard-footer"><span class="rcard-source">CSOP Asset Management</span></div>
+      </div>
+      <div class="research-card">
+        <div class="rcard-top">
+          <span class="rcard-tag tag-research">策略</span>
+          <span class="rcard-date">2026-04-08</span>
+        </div>
+        <div class="rcard-title">美国利率路径与新兴市场ETF资金轮动研究</div>
+        <div class="rcard-summary">美联储降息节奏放缓背景下，东南亚和印度市场面临资金流出压力。但亚太精选ETF（159687）受益于多元化配置，波动率显著低于单一市场产品。</div>
+        <div class="rcard-footer"><span class="rcard-source">CSOP Asset Management</span></div>
+            <div class="research-card">
+        <div class="rcard-top">
+          <span class="rcard-tag tag-market">市场策略</span>
+          <span class="rcard-date">2026-04-15</span>
+        </div>
+        <div class="rcard-title">恒生科技指数：底部反弹潜力与配置价值分析</div>
+        <div class="rcard-summary">&#x1F525; <strong>技术面：</strong>2022年以来回测显示，单日涨幅超4%后追涨一个月胜率超60%，4-7月最容易取得超额收益。<br><br>&#x1F4B0; <strong>估值面：</strong>前瞻市盈率从高点22.4x回落至18.4x，悲观定价充分，横向对比纳指明显偏低，赔率优势凸显。<br><br>&#x1F98D; <strong>政策面：</strong>外卖行业监管趋稳，平台营销支出压力缓解，"业绩底"逻辑逐步清晰。<br><br>&#x1F30D; <strong>地缘面：</strong>美伊停火协议推进，原油价格回落，美元指数自100回落至98，新兴市场资金回暖信号出现。<br><br><strong>相关标的：</strong> #3033 #7226</div>
+        <div class="rcard-footer"><span class="rcard-source">CSOP Research Team</span></div>
+      </div>
+</div>
+    </div>
+  </div>
+
+  <!-- ========== TAB 3: 海外聪明钱 ========== -->
+  <div class="pn" id="pn3">
+    <div class="sec-title">香港ETF实时资金流 <span>数据来源：CSOP Asset Management</span></div>
+    <div class="info-box">
+      追踪香港上市ETF的资金流向，捕捉机构投资者的配置动向。
+    </div>
+
+    <div class="flow-tabs">
+      <div class="flow-tab ac" id="flow-tab-in" onclick="switchFlow('in') inflow')
+      <div class="flow-tab" id="flow-tab-out" onclick="switchFlow('out')">&#x2B07; 资金流出排行</div>
+    </div>
+
+    <div id="flow-in" class="flow-section">
+      <div class="flow-table">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:50px">排名</th>
+              <th>基金名称</th>
+              <th style="text-align:right">净流入（USD）</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="flow-rank">1</td><td><div class="flow-name">CSOP Hang Seng TECH Index ETF</div><div class="flow-code">3033.HK</div></td><td class="flow-amount flow-in">+$678,991,550</td></tr>
+            <tr><td class="flow-rank">2</td><td><div class="flow-name">CSOP FTSE Hong Kong Equity ETF</div><div class="flow-code">3037.HK</div></td><td class="flow-amount flow-in">+$535,373,195</td></tr>
+            <tr><td class="flow-rank">3</td><td><div class="flow-name">CSOP HSCEI Covered Call Active ETF</div><div class="flow-code">3433.HK</div></td><td class="flow-amount flow-in">+$321,456,800</td></tr>
+            <tr><td class="flow-rank">4</td><td><div class="flow-name">CSOP Samsung Electronics Daily (2x) Lvrd</div><div class="flow-code">7747.HK</div></td><td class="flow-amount flow-in">+$289,234,120</td></tr>
+            <tr><td class="flow-rank">5</td><td><div class="flow-name">CSOP Saudi Arabia ETF</div><div class="flow-code">2830.HK</div></td><td class="flow-amount flow-in">+$198,765,430</td></tr>
+            <tr><td class="flow-rank">6</td><td><div class="flow-name">CSOP HKD Money Market ETF</div><div class="flow-code">3053.HK</div></td><td class="flow-amount flow-in">+$156,890,234</td></tr>
+            <tr><td class="flow-rank">7</td><td><div class="flow-name">CSOP Hang Seng Index Daily (2x) Lvrd</div><div class="flow-code">7200.HK</div></td><td class="flow-amount flow-in">+$134,567,890</td></tr>
+            <tr><td class="flow-rank">8</td><td><div class="flow-name">CSOP NASDAQ-100 Index Daily (-2x) Inv</div><div class="flow-code">7568.HK</div></td><td class="flow-amount flow-in">+$98,234,567</td></tr>
+            <tr><td class="flow-rank">9</td><td><div class="flow-name">CSOP FTSE Asia Pacific Low Carbon Idx ETF</div><div class="flow-code">3193.HK</div></td><td class="flow-amount flow-in">+$87,654,321</td></tr>
+            <tr><td class="flow-rank">10</td><td><div class="flow-name">CSOP USD Money Market ETF</div><div class="flow-code">3096.HK</div></td><td class="flow-amount flow-in">+$76,543,210</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="flow-out" class="flow-section" style="display:none">
+      <div class="flow-table">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:50px">排名</th>
+              <th>基金名称</th>
+              <th style="text-align:right">净流出（USD）</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="flow-rank">1</td><td><div class="flow-name">CSOP Hong Kong Dollar Money Market ETF</div><div class="flow-code">3053.HK</div></td><td class="flow-amount flow-out">-$295,079,608</td></tr>
+            <tr><td class="flow-rank">2</td><td><div class="flow-name">CSOP SK Hynix Daily (2x) Leveraged</div><div class="flow-code">7709.HK</div></td><td class="flow-amount flow-out">-$223,098,988</td></tr>
+            <tr><td class="flow-rank">3</td><td><div class="flow-name">CSOP Select US Dollar Bond Fund</div><div class="flow-code">3122.HK</div></td><td class="flow-amount flow-out">-$187,654,321</td></tr>
+            <tr><td class="flow-rank">4</td><td><div class="flow-name">CSOP MSCI HK China Connect Select ETF</div><div class="flow-code">3443.HK</div></td><td class="flow-amount flow-out">-$145,678,901</td></tr>
+            <tr><td class="flow-rank">5</td><td><div class="flow-name">CSOP Hang Seng TECH Index Daily (-2x)</div><div class="flow-code">7552.HK</div></td><td class="flow-amount flow-out">-$134,234,567</td></tr>
+            <tr><td class="flow-rank">6</td><td><div class="flow-name">CSOP Hang Seng TECH Index Daily (2x)</div><div class="flow-code">7226.HK</div></td><td class="flow-amount flow-out">-$112,345,678</td></tr>
+            <tr><td class="flow-rank">7</td><td><div class="flow-name">CSOP FTSE Asia Pacific Low Carbon Idx</div><div class="flow-code">3193.HK</div></td><td class="flow-amount flow-out">-$98,765,432</td></tr>
+            <tr><td class="flow-rank">8</td><td><div class="flow-name">CSOP MSCI China A50 Connect ETF</div><div class="flow-code">3003.HK</div></td><td class="flow-amount flow-out">-$87,654,321</td></tr>
+            <tr><td class="flow-rank">9</td><td><div class="flow-name">CSOP Hang Seng TECH Index Daily (-2x)</div><div class="flow-code">7552.HK</div></td><td class="flow-amount flow-out">-$76,543,210</td></tr>
+            <tr><td class="flow-rank">10</td><td><div class="flow-name">CSOP FTSE China A50 ETF</div><div class="flow-code">2822.HK</div></td><td class="flow-amount flow-out">-$65,432,109</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">产品详情</div>
+      <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+// 亚太精选ETF - 20大持仓
+const APR_HOLDINGS = [
+  ['台积电','2330.TW','中国台湾','台湾证交所',10.5,8.46,29.45,135.21,298.14,11.49],
+  ['三星电子','005930.KS','韩国','韩国证交所',10.63,9.63,71.81,270.92,232.15,5.40],
+  ['腾讯控股','0700.HK','中国内地','香港交易所',3.13,-8.85,-15.78,14.41,34.13,3.60],
+  ['阿里巴巴','9988.HK','中国香港','香港交易所',5.91,-5.99,-12.11,20,29.24,2.60],
+  ['丰田汽车','7203.T','日本','东京证交所',1.97,-3.01,0.37,34.5,97.8,2.18],
+  ['爱思开海力士','000660.KS','韩国','韩国证交所',17.24,9.49,58.05,463.85,1060,2.13],
+  ['澳洲联邦银行','CBA.AX','澳大利亚','澳大利亚证交所',6.12,6.74,15.73,22.11,105.23,2.03],
+  ['三菱UFJ金融集团','8306.T','日本','东京证交所',2.92,5.95,15.66,71.02,266.3,1.82],
+  ['东京威力科创','8035.T','日本','东京证交所',14.63,10.97,29.43,128.16,204.31,1.54],
+  ['爱德万测试','6857.T','日本','东京证交所',15.94,3.8,27.27,324.19,814.21,1.45],
+  ['日立制作所','6501.T','日本','东京证交所',-0.02,-2.47,-1.88,48.96,240.29,1.39],
+  ['三井住友金融','8316.T','日本','东京证交所',3.03,4.94,11.5,77.77,241.97,1.18],
+  ['索尼','6758.T','日本','东京证交所',0.03,-1.91,-17.05,-5.08,45.22,1.14],
+  ['友邦保险','1299.HK','中国香港','香港交易所',3.25,3.85,11.05,80.45,14.58,1.10],
+  ['台达电','2308.TW','中国台湾','台湾证交所',21.33,34.5,80.17,472.4,527.4,1.02],
+  ['西太平洋银行','WBC.AX','澳大利亚','澳大利亚证交所',7.33,4.73,10.8,45.94,132.12,0.96],
+  ['瑞穗金融集团','8411.T','日本','东京证交所',4.92,6.4,20.42,103.07,289.14,0.96],
+  ['建设银行','0939.HK','中国内地','香港交易所',0,6.83,10.17,44.28,112.53,0.94],
+  ['鸿海精密','2317.TW','中国台湾','台湾证交所',3.89,-4.3,-13.02,68.24,116.9,0.94],
+  ['联发科','2454.TW','中国台湾','台湾证交所',7.51,-7.62,12.27,25.93,161.67,0.92],
+];
+const APR_INDICES = [
+  ['富时亚太低碳精选指数','GPCSP7UR Index',6.71,2.54,9.90,48.17,76.43],
+  ['恒生指数','^HSI',3.09,-0.26,1.03,25.20,27.36],
+  ['沪深300指数','000300.SS',4.41,-0.82,0.14,24.13,12.95],
+  ['上证指数','000001.SS',2.74,-3.32,0.44,23.66,20.24],
+  ['韩国KOSPI','^KS11',8.96,5.90,39.03,139.62,133.23],
+  ['日经225指数','^N225',7.15,4.93,13.08,64.48,106.00],
+  ['台湾加权指数','^TWII',8.74,8.07,22.28,86.41,123.09],
+  ['澳大利亚ASX200','^AXJO',4.44,3.08,2.83,16.23,24.13],
+  ['印度Nifty50','INDY',4.89,-1.84,-10.37,-3.42,15.56],
+];
+
+// 东南亚科技ETF - 10大持仓
+const SEA_HOLDINGS = [
+  ['台达电子(泰国)','DELTA.BK','泰国','泰国证交所',17.41,23.83,83.65,358.8,232.24,14.65],
+  ['阿斯特拉国际','ASII.JK','印度尼西亚','印尼证交所',3.70,5.00,-5.97,45.26,41.23,9.61],
+  ['威普罗','WIT','印度','纽约证交所',0.46,-14.90,-23.59,-22.05,-0.17,9.53],
+  ['印福思','INFY','印度','纽约证交所',-3.28,-5.34,-25.42,-19.43,-16.65,9.28],
+  ['Grab控股','GRAB','新加坡','纳斯达克',1.66,-4.91,-26.25,-7.30,20.26,9.16],
+  ['Sea Limited','SE','新加坡','纽约证交所',4.42,-3.64,-32.65,-25.47,2.86,8.27],
+  ['Venture Corp','V03.SI','新加坡','新加坡交易所',3.91,2.64,5.35,56.75,6.25,5.95],
+  ['GoTo Gojek Tokopedia','GOTO.JK','印度尼西亚','印尼证交所',-1.89,-5.45,-18.75,-31.58,-44.68,5.39],
+  ['森那美公司','4197.KL','马来西亚','马来西亚交易所',0.00,-5.60,3.18,16.33,21.71,5.30],
+  ['奕丰集团','AIY.SI','新加坡','新加坡交易所',5.98,6.58,-1.37,48.59,95.68,2.84],
+];
+const SEA_INDICES = [
+  ['新交所泛东南亚科技指数','ASIATECN Index',5.09,1.42,-10.37,25.88,0],
+  ['新加坡海峡时报指数','^STI',0.85,2.65,7.39,39.45,51.45],
+  ['印度Nifty50指数','INDY',4.89,-1.84,-10.37,-3.42,15.56],
+  ['印尼雅加达综合指数','^JKSE',6.14,0.24,-13.74,19.26,10.15],
+  ['泰国SET指数','^SET.BK',3.63,7.19,19.62,32.88,-5.42],
+  ['富时大马吉隆坡综合指数','^KLSE',-0.25,-0.61,0.67,15.60,18.43],
+  ['沪深300指数','000300.SS',4.41,-0.82,0.14,24.13,12.95],
+  ['恒生指数','^HSI',3.09,-0.26,1.03,25.20,27.36],
+];
+
+// Product configs
+const PRODUCTS = {
+  '恒生科技': {
+    name:'恒生科技ETF', code:'513130.SH', partner:'华泰柏瑞',
+    index:'恒生科技指数', scale:'456亿', nav:'0.622', change:'+1.97%', up:true,
+    desc:'聚焦香港上市规模最大的30家科技龙头，包括腾讯、阿里、美团、京东等。',
+    holdings:[
+      ['腾讯控股','0700.HK','香港','港交所',5.2,3.1,-8.5],
+      ['阿里巴巴','9988.HK','香港','港交所',4.8,2.9,-5.2],
+      ['美团','3690.HK','香港','港交所',3.9,4.2,12.1],
+      ['京东集团','9618.HK','香港','港交所',2.8,1.5,-3.7],
+      ['小米集团','1810.HK','香港','港交所',2.5,3.8,15.2],
+      ['网易','9999.HK','香港','港交所',2.1,1.2,-2.3],
+      ['百度集团','9888.HK','香港','港交所',1.9,0.8,-6.1],
+      ['联想集团','992.HK','香港','港交所',1.6,2.1,8.4],
+      ['快手','1024.HK','香港','港交所',1.5,3.2,22.5],
+      ['商汤','0020.HK','香港','港交所',1.2,1.8,5.6],
+    ],
+    indices:[
+      ['恒生科技指数','HSTECH',3.09,2.85,15.78,45.23,89.45],
+      ['恒生指数','^HSI',3.09,-0.26,1.03,25.20,27.36],
+    ]
+  },
+  '亚太精选': {
+    name:'亚太精选ETF', code:'159687.SZ', partner:'南方基金',
+    index:'富时亚太低碳精选指数', scale:'15亿', nav:'1.691', change:'+1.32%', up:true,
+    desc:'覆盖亚太发达及新兴市场，低碳主题筛选，台湾、韩国、日本比重较高。',
+    holdings: APR_HOLDINGS,
+    indices: APR_INDICES
+  },
+  '东南亚科技': {
+    name:'东南亚科技ETF', code:'513730.SH', partner:'华泰柏瑞',
+    index:'新交所泛东南亚科技指数', scale:'13亿', nav:'1.258', change:'+0.80%', up:true,
+    desc:'聚焦东南亚科技产业，受益于该地区数字化转型红利。',
+    holdings: SEA_HOLDINGS,
+    indices: SEA_INDICES
+  },
+  '沙特': {
+    name:'沙特阿拉伯ETF', code:'2830.HK', partner:'南方东英',
+    index:'富时沙特阿拉伯指数', scale:'-', nav:'83.700', change:'+0.31%', up:true,
+    desc:'布局沙特阿拉伯市场，能源+金融双轮驱动，受益于沙国经济多元化转型。',
+    holdings:[
+      ['拉吉希银行','1120.SR','沙特','沙特证交所',0.56,6.32,10.36,12.36,52.11,15.63],
+      ['沙特阿美','2222.SR','沙特','沙特证交所',0.36,4.06,17.29,12.27,9.26,12.16],
+      ['沙特国家银行','1180.SR','沙特','沙特证交所',4.87,8.71,16.00,33.19,36.14,9.49],
+      ['沙特采矿公司','1211.SR','沙特','沙特证交所',8.10,4.57,18.29,64.24,59.75,7.18],
+      ['沙特电信','7010.SR','沙特','沙特证交所',1.60,2.08,1.76,3.41,24.39,6.04],
+      ['沙特基础工业','2010.SR','沙特','沙特证交所',-1.81,3.37,19.57,2.84,-24.58,3.99],
+      ['利雅德银行','1010.SR','沙特','沙特证交所',3.08,5.31,10.66,-0.88,13.06,3.21],
+      ['ACWA电力公司','2082.SR','沙特','沙特证交所',1.27,0.24,-7.59,-48.53,14.74,2.81],
+      ['沙特Awwal银行','1060.SR','沙特','沙特证交所',1.41,6.39,15.19,14.04,21.27,2.74],
+      ['沙特基础工业农营','2020.SR','沙特','沙特证交所',4.05,14.28,45.37,60.02,42.75,2.71],
+    ],
+    indices:[
+      ['恒生科技指数*','HSTECHN Index',-0.79,-2.95,-12.35,-0.63,19.15],
+      ['恒生指数','^HSI',2.17,0.77,0.12,22.69,26.13],
+      ['沪深300指数','000300.SS',4.62,-0.49,0.35,23.88,14.18],
+      ['上证指数','000001.SS',2.80,-2.61,0.50,23.17,20.20],
+    ]
+  },
+  '新经济': {
+    name:'新经济ETF', code:'159822.SZ', partner:'银华基金',
+    index:'新经济主题指数', scale:'2.6亿', nav:'0.663', change:'+1.69%', up:true,
+    desc:'捕捉中国新经济转型机遇，消费+科技+医疗为主要配置方向。',
+    holdings:[
+      ['阿里巴巴','9988.HK','中国','港交所',8.5,3.2,-5.8],
+      ['腾讯控股','0700.HK','中国','港交所',7.8,4.5,3.2],
+      ['美团','3690.HK','中国','港交所',6.2,5.1,12.3],
+      ['京东集团','9618.HK','中国','港交所',5.5,2.8,-2.1],
+      ['小米集团','1810.HK','中国','港交所',4.8,4.2,15.8],
+      ['网易','9999.HK','中国','港交所',4.2,2.1,-1.5],
+      ['比亚迪','002594.SZ','中国','深交所',3.8,5.5,25.2],
+      ['宁德时代','300750.SZ','中国','深交所',3.5,3.2,18.5],
+      ['恒瑞医药','600276.SH','中国','上交所',3.2,1.8,8.9],
+      ['迈瑞医疗','300760.SZ','中国','深交所',2.9,2.5,12.1],
+    ],
+    indices:[
+      ['恒生科技指数','HSTECH',3.09,2.85,15.78,45.23,89.45],
+      ['中证新经济指数','CSI_NE',4.5,3.2,12.8,38.5,72.3],
+    ]
+  },
+  '恒生港美科技': {
+    name:'恒生港美科技ETF', code:'3442.HK', partner:'南方东英',
+    index:'恒生港美科技指数', scale:'-', nav:'8.210', change:'+1.86%', up:true,
+    desc:'同时覆盖香港与美国科技龙头，港股+美股科技巨头一网打尽。',
+    holdings:[
+      ['美团-W','3690.HK','中国内地','香港交易所',9.16,10.75,-14.79,-39.75,-34.53,7.56],
+      ['比亚迪股份','1211.HK','中国内地','香港交易所',1.15,8.41,10.52,-7.38,43.02,7.13],
+      ['腾讯控股','0700.HK','中国内地','香港交易所',3.13,-8.85,-15.78,14.41,34.13,6.46],
+      ['小米集团','1810.HK','中国内地','香港交易所',0.06,-8.09,-21.17,-28.22,155.79,6.39],
+      ['阿里巴巴','9988.HK','中国香港','香港交易所',5.91,-5.99,-12.11,20.00,29.24,6.08],
+      ['中芯国际','0981.HK','中国内地','香港交易所',14.22,-9.27,-18.36,32.09,159.47,5.79],
+      ['亚马逊','AMZN','美国','纳斯达克',13.64,11.22,3.28,31.54,133.32,5.76],
+      ['英伟达','NVDA','美国','纳斯达克',6.34,2.09,1.15,75.40,584.57,5.28],
+      ['Alphabet','GOOGL','美国','纳斯达克',7.26,3.32,1.43,108.31,200.51,5.27],
+      ['苹果','AAPL','美国','纳斯达克',1.78,-0.13,-4.10,37.39,63.09,4.98],
+      ['Meta','META','美国','纳斯达克',9.64,-3.62,-4.50,15.66,195.60,4.85],
+      ['微软','MSFT','美国','纳斯达克',-0.69,-8.60,-23.14,-2.00,31.19,4.63],
+      ['特斯拉','TSLA','美国','纳斯达克',-3.23,-12.60,-22.41,38.25,89.12,4.48],
+      ['快手','1024.HK','中国内地','香港交易所',0.53,-26.48,-29.19,-6.03,-19.08,3.23],
+      ['小鹏汽车','9868.HK','中国内地','香港交易所',-1.11,-7.33,-15.24,-5.90,66.05,2.57],
+      ['理想汽车','2015.HK','中国内地','香港交易所',3.34,7.46,14.77,-13.11,-20.17,2.44],
+      ['地平线','9660.HK','中国内地','香港交易所',8.30,-5.65,-16.61,25.96,0.00,1.99],
+      ['华虹公司','1347.HK','中国内地','香港交易所',15.94,1.49,24.16,204.64,146.78,1.73],
+      ['商汤集团','0020.HK','中国内地','香港交易所',8.65,-14.47,-8.64,42.55,-39.64,1.63],
+      ['联想集团','0992.HK','中国香港','香港交易所',4.33,6.87,9.18,30.80,34.20,1.63],
+    ],
+    indices:[
+      ['恒生港美科技指数','HSUSTN Index',4.75,-3.04,-9.61,15.91,0],
+      ['恒生指数','^HSI',3.09,-0.26,1.03,25.20,27.36],
+      ['沪深300指数','000300.SS',4.41,-0.82,0.14,24.13,12.95],
+      ['上证指数','000001.SS',2.74,-3.32,0.44,23.66,20.24],
+    ]
+  },
+};;
+
+function cc(v){try{const n=parseFloat(v);if(isNaN(n))return'vg';return n>=0?'vg':'vr';}catch(e){return'vg';}}
+
+function renderModal(key) {
+  const p = PRODUCTS[key];
+  if (!p) return;
+  
+  let h = '<div style="margin-bottom:20px;padding:14px;background:var(--card2);border-radius:10px;border:1px solid var(--border)">';
+  h += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">';
+  h += '<div><div style="font-size:18px;font-weight:800">'+p.name+'</div><div style="font-size:12px;color:var(--dim);margin-top:4px">'+p.code+(p.partner!='-'?' · '+p.partner:'')+'</div></div>';
+  h += '<div style="text-align:right"><div style="font-size:28px;font-weight:800">'+p.nav+'</div><div class="'+cc(p.change)+'" style="font-size:14px;font-weight:700;margin-top:2px">'+p.change+'</div></div>';
+  h += '</div><div style="margin-top:12px;font-size:13px;color:var(--dim);line-height:1.6">'+p.desc+'</div>';
+  h += '<div class="chip"><span>底层指数: '+p.index+'</span><span>规模: '+p.scale+'</span></div>';
+  h += '</div>';
+  
+  // Holdings
+  h += '<div class="modal-section"><h4>前十大持仓</h4><div class="modal-table"><table>';
+  h += '<thead><tr><th>股票名称</th><th>代码</th><th>地区</th><th>上市交易所</th><th>1周%</th><th>1月%</th><th>YTD%</th><th>权重%</th></tr></thead><tbody>';
+  p.holdings.forEach(function(r){
+    h += '<tr>';
+    h += '<td style="font-weight:600">'+r[0]+'</td>';
+    h += '<td style="color:var(--dim);font-size:11px">'+r[1]+'</td>';
+    h += '<td>'+r[2]+'</td>';
+    h += '<td style="color:var(--dim);font-size:11px">'+r[3]+'</td>';
+    h += '<td class="'+cc(r[4])+'" style="font-weight:600">'+(r[4]>=0?'+':'')+r[4].toFixed(2)+'%</td>';
+    h += '<td class="'+cc(r[5])+'" style="font-weight:600">'+(r[5]>=0?'+':'')+r[5].toFixed(2)+'%</td>';
+    h += '<td class="'+cc(r[6])+'" style="font-weight:600">'+(r[6]>=0?'+':'')+r[6].toFixed(2)+'%</td>';
+    h += '<td style="font-weight:700">'+r[7].toFixed(2)+'%</td>';
+    h += '</tr>';
+  });
+  h += '</tbody></table></div></div>';
+  
+  // Indices
+  if (p.indices) {
+    h += '<div class="modal-section"><h4>主要市场指数表现</h4><div class="index-grid">';
+    p.indices.forEach(function(r){
+      h += '<div class="index-card">';
+      h += '<div class="iname">'+r[0]+'</div>';
+      h += '<div class="ichange '+cc(r[2])+'">'+(r[2]>=0?'+':'')+r[2].toFixed(2)+'%</div>';
+      h += '<div class="index-row"><span>1个月</span><span class="'+cc(r[3])+'">'+(r[3]>=0?'+':'')+r[3].toFixed(2)+'%</span></div>';
+      h += '<div class="index-row"><span>YTD</span><span class="'+cc(r[4])+'">'+(r[4]>=0?'+':'')+r[4].toFixed(2)+'%</span></div>';
+      h += '<div class="index-row"><span>1年</span><span class="'+cc(r[5])+'">'+(r[5]>=0?'+':'')+r[5].toFixed(2)+'%</span></div>';
+      h += '<div class="index-row"><span>3年</span><span class="'+cc(r[6])+'">'+(r[6]>=0?'+':'')+r[6].toFixed(2)+'%</span></div>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+  }
+  
+  return h;
+}
+
+function openModal(key) {
+  document.getElementById('modal-title').textContent = PRODUCTS[key] ? PRODUCTS[key].name : key;
+  document.getElementById('modal-body').innerHTML = renderModal(key) || '<div class="empty-state"><p>暂无数据</p></div>';
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function sw(i){
+  document.querySelectorAll('.ta').forEach(function(t,j){t.classList.toggle('ac',j===i);});
+  document.querySelectorAll('.pn').forEach(function(p,j){p.classList.toggle('ac',j===i);});
+}
+
+function toggleCat(el){
+  var icon = el.querySelector('.toggle-icon');
+  var grid = el.nextElementSibling;
+  if(!grid) return;
+  icon.classList.toggle('open');
+  grid.style.display = icon.classList.contains('open') ? '' : 'none';
+}
+
+function switchFlow(type){
+  document.getElementById('flow-tab-in').classList.toggle('ac',type==='in');
+  document.getElementById('flow-tab-out').classList.toggle('ac',type==='out');
+  document.getElementById('flow-in').style.display = type==='in' ? '' : 'none';
+  document.getElementById('flow-out').style.display = type==='out' ? '' : 'none';
+}
+
+document.getElementById('upt').textContent = '更新: '+new Date().toLocaleTimeString('zh-CN');
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+</script>
+</body>
+</html>

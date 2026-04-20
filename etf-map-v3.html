@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全球ETF投资地图</title>
+<style>
+:root{
+  --bg:#f5f6fa;--card:#ffffff;--card2:#f0f2f8;--border:#e2e5ef;
+  --text:#1a1d2e;--text2:#5a6072;--dim:#8892a8;
+  --green:#22c55e;--red:#ef4444;--orange:#f97316;--blue:#3b82f6;--gold:#eab308;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:#fff;border-bottom:2px solid #e2e5ef;padding:0 32px;display:flex;justify-content:space-between;align-items:center;height:60px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.logo{font-size:17px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px}
+.logo .beta{background:var(--orange);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px}
+.hdr-right{display:flex;align-items:center;gap:14px}
+.upd{font-size:12px;color:var(--dim)}
+.lt{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pl 2s infinite}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.3}}
+.st{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:5px}
+.tabs{background:#fff;padding:0 32px;display:flex;border-bottom:1px solid var(--border)}
+.ta{padding:13px 24px;font-size:14px;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:600;transition:.15s;display:flex;align-items:center;gap:6px}
+.ta:hover{color:var(--orange)}
+.ta.ac{color:var(--orange);border-bottom-color:var(--orange)}
+.mn{padding:24px 32px;max-width:1200px;margin:0 auto}
+.pn{display:none}
+.pn.ac{display:block}
+.sec-title{font-size:15px;font-weight:800;color:var(--text);margin-bottom:14px;padding-left:12px;border-left:4px solid var(--orange);display:flex;align-items:center;justify-content:space-between}
+.sec-title .sub{font-size:12px;color:var(--dim);font-weight:400}
+.info-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 16px;font-size:13px;color:#92400e;margin-bottom:20px;line-height:1.7}
+.tbl{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);margin-bottom:20px}
+.tbl table{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{background:#f8f9fc;padding:10px 12px;text-align:left;font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;font-weight:700;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+.tbl th:hover{color:var(--orange)}
+.tbl th.sorted{color:var(--orange)}
+.th-sort::after{content:" \2195";font-size:9px;opacity:.35;margin-left:3px}
+.th-sort.asc::after{content:" \2191";opacity:1}
+.th-sort.desc::after{content:" \2193";opacity:1}
+.tbl td{padding:10px 12px;border-bottom:1px solid #f0f0f5;vertical-align:middle;color:var(--text)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#fafafa}
+.nm{text-align:right;font-variant-numeric:tabular-nums}
+.vg{color:var(--green);font-weight:700}.vr{color:var(--red);font-weight:700}.vo{color:var(--orange);font-weight:700}.vb{color:var(--blue)}
+.tag-o{background:#ffedd5;color:#ea580c;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:700}
+.tag-b{background:#dbeafe;color:#1d4ed8;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:700}
+.tag-g{background:#dcfce7;color:#16a34a;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:700}
+.tag-r{background:#fee2e2;color:#dc2626;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:700}
+.tag-d{background:#f3f4f6;color:#6b7280;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:700}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal.open{display:flex}
+.mbox{background:#fff;border-radius:16px;width:100%;max-width:960px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.mhead{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;border-radius:16px 16px 0 0;z-index:2}
+.mtitle{font-size:15px;font-weight:800}
+.mclose{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--dim);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.mclose:hover{color:var(--text)}
+.mbody{padding:18px 22px}
+.mprice-row{display:flex;align-items:flex-end;gap:20px;margin-bottom:14px;flex-wrap:wrap}
+.mnav{font-size:30px;font-weight:900}
+.mchg{font-size:15px;font-weight:700;margin-top:3px}
+.mmeta{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.mmeta span{font-size:12px;color:var(--dim);background:var(--card2);padding:4px 10px;border-radius:20px}
+.chart-wrap{margin:14px 0;background:var(--card2);border-radius:10px;padding:14px}
+.chart-title{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;font-weight:600}
+canvas#kchart{max-width:100%;height:160px;background:#fff;border-radius:8px;border:1px solid var(--border)}
+.chart-legend{display:flex;gap:14px;margin-top:8px;font-size:11px;color:var(--dim)}
+.chart-legend span{display:flex;align-items:center;gap:4px}
+.cline{width:12px;height:2px;display:inline-block}
+.cline-p{background:#3b82f6}.cline-v{background:#f97316}
+.hsec{margin-top:18px}
+.hsec h4{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:10px;font-weight:600}
+.mtbl{width:100%;border-collapse:collapse;font-size:12px;overflow-x:auto;display:block}
+.mtbl table{min-width:600px;width:100%}
+.mtbl th{background:#f8f9fc;padding:8px 10px;text-align:left;font-size:10px;color:var(--dim);text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+.mtbl td{padding:8px 10px;border-bottom:1px solid #f5f5f5;vertical-align:middle;white-space:nowrap}
+.mtbl tr:last-child td{border-bottom:none}
+.mtbl tr:hover td{background:#fafafa}
+.rank{font-weight:800;color:var(--dim);width:26px}
+.igrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-top:14px}
+.icard{background:var(--card2);border-radius:8px;padding:12px}
+.icard .iname{font-size:11px;color:var(--dim);margin-bottom:4px}
+.icard .iprice{font-size:17px;font-weight:800}
+.icard .ichg{font-size:12px;font-weight:700;margin-top:2px}
+.ir{display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:var(--dim)}
+.ir span:last-child{font-weight:600;color:var(--text)}
+.chan-row{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.chan-icon{font-size:20px}
+.chan-name{font-weight:800;font-size:14px}
+.chan-sub{font-size:11px;color:var(--dim);margin-top:1px}
+.chan-ok{display:inline-flex;align-items:center;gap:4px;background:#dcfce7;color:#16a34a;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:700}
+.chan-warn{display:inline-flex;align-items:center;gap:4px;background:#ffedd5;color:#ea580c;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:700}
+.chan-limit{display:inline-flex;align-items:center;gap:4px;background:#fee2e2;color:#dc2626;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:700}
+.stars{color:var(--gold);letter-spacing:1px}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.rcard{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:.2s;box-shadow:0 2px 8px rgba(0,0,0,0.03)}
+.rcard:hover{border-color:var(--orange);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.rtop{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.rtag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px}
+.rtag-b{background:#dbeafe;color:#1d4ed8}.rtag-r{background:#fee2e2;color:#dc2626}
+.rtag-g{background:#dcfce7;color:#16a34a}.rtag-o{background:#ffedd5;color:#ea580c}
+.rdate{font-size:11px;color:var(--dim)}
+.rtitle{font-size:14px;font-weight:700;line-height:1.5;margin-bottom:8px}
+.rsummary{font-size:12px;color:var(--text2);line-height:1.65}
+.rfooter{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.rsrc{font-size:11px;color:var(--dim)}
+.rtags{display:flex;gap:4px;flex-wrap:wrap}
+.rtags span{font-size:10px;background:#f0f0f5;color:var(--dim);padding:2px 7px;border-radius:10px}
+.flow-tabs{display:flex;gap:8px;margin-bottom:14px}
+.ftab{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);color:var(--dim);background:#fff;transition:.15s}
+.ftab.ac{background:var(--orange);color:#fff;border-color:var(--orange)}
+.fsection{display:none}.fsection.ac{display:block}
+.ftbl{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.03)}
+.ftbl table{width:100%;border-collapse:collapse;font-size:13px}
+.ftbl th{background:#f8f9fc;padding:10px 14px;text-align:left;font-size:11px;color:var(--dim);text-transform:uppercase;border-bottom:1px solid var(--border)}
+.ftbl td{padding:10px 14px;border-bottom:1px solid #f0f0f5}
+.ftbl tr:last-child td{border-bottom:none}
+.rnum{font-weight:900;color:var(--dim);width:32px;font-size:15px}
+.fname{font-weight:600}.fcode{font-size:11px;color:var(--dim);margin-top:2px}
+.famt{font-weight:800;font-size:14px;text-align:right;white-space:nowrap}
+.fin{color:var(--green)}.fout{color:var(--red)}
+@media(max-width:768px){
+  .header,.tabs{padding:0 14px}.mn{padding:14px}
+  .tbl{overflow-x:auto}.tbl table{min-width:900px}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">&#x1F30F; 全球ETF投资地图 <span class="beta">BETA</span></div>
+  <div class="hdr-right">
+    <span class="upd" id="upt"></span>
+    <div class="st"><span class="lt"></span>实时行情</div>
+  </div>
+</div>
+<div class="tabs">
+  <div class="ta ac" id="tab0" onclick="sw(0)">&#x1F4CA; ETF列表</div>
+  <div class="ta" id="tab1" onclick="sw(1)">&#x1F3ED; 投资渠道</div>
+  <div class="ta" id="tab2" onclick="sw(2)">&#x1F4DC; 海外机构观点</div>
+  <div class="ta" id="tab3" onclick="sw(3)">&#x1F4B0; 海外聪明钱</div>
+</div>
+<div class="mn">
+  <div class="pn ac" id="pn0">
+    <div class="sec-title">跨境ETF实时行情 <span class="sub">点击卡片查看分时走势及成分股</span></div>
+    <div class="tbl">
+      <table id="etftbl">
+        <thead>
+          <tr>
+            <th class="th-sort" data-sort="name">产品 <span class="sort-icon"></span></th>
+            <th class="th-sort desc" data-sort="chg">涨跌幅 <span class="sort-icon"></span></th>
+            <th class="th-sort" data-sort="last">最新价 <span class="sort-icon"></span></th>
+            <th class="th-sort" data-sort="turnover">今日成交额 <span class="sort-icon"></span></th>
+            <th class="th-sort" data-sort="premium">折溢价 <span class="sort-icon"></span></th>
+            <th class="th-sort" data-sort="flow1d">昨日净流入 <span class="sort-icon"></span></th>
+            <th class="th-sort" data-sort="flow1m">近1月净流入 <span class="sort-icon"></span></th>
+            <th>跟踪指数</th>
+            <th>国家分布</th>
+          </tr>
+        </thead>
+        <tbody id="etftbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="pn" id="pn1">
+    <div class="sec-title">全球ETF配置方式对比</div>
+    <div class="info-box">以下对比<b>四种主流跨境投资渠道</b>，帮助投资者选择最适合自身情况的入场方式。</div>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>渠道</th><th>投资途径</th><th>开通条件</th><th>税收</th><th>额度</th><th>便捷度</th><th>适合人群</th></tr></thead>
+        <tbody>
+          <tr><td><div class="chan-row"><span class="chan-icon">&#x1F3E6;</span><div><div class="chan-name">QDII</div><div class="chan-sub">合格境内机构投资者</div></div></div></td><td>A股股票账户直接购买</td><td>只需拥有股票账户</td><td><span class="chan-limit">股息税 20%</span></td><td><span class="chan-warn">额度受限</span></td><td><span class="stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</span></td><td>适合所有投资者</td></tr>
+          <tr><td><div class="chan-row"><span class="chan-icon">&#x1F309;</span><div><div class="chan-name">港股通</div><div class="chan-sub">沪港通 / 深港通</div></div></div></td><td>开通港股通权限</td><td>股票账户资产 &#x2265;50万</td><td><span class="chan-limit">股息税 20%</span></td><td><span class="chan-ok">含在额度内</span></td><td><span class="stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</span></td><td>高净值投资者</td></tr>
+          <tr><td><div class="chan-row"><span class="chan-icon">&#x1F310;</span><div><div class="chan-name">跨境理财通</div><div class="chan-sub">大湾区居民专享</div></div></div></td><td>指定银行办理</td><td>大湾区居民身份</td><td><span class="chan-ok">暂免所得税</span></td><td><span class="chan-warn">有限额</span></td><td><span class="stars">&#x2605;&#x2605;&#x2605;</span></td><td>大湾区居民</td></tr>
+          <tr><td><div class="chan-row"><span class="chan-icon">&#x2708;</span><div><div class="chan-name">海外直投</div><div class="chan-sub">境外券商开户</div></div></div></td><td>海外券商账户</td><td>拥有境外银行账户</td><td><span class="chan-warn">按当地法律</span></td><td><span class="chan-ok">无限制</span></td><td><span class="stars">&#x2605;&#x2605;&#x2605;</span></td><td>专业投资者</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="pn" id="pn2">
+    <div class="sec-title">海外机构最新观点 <span class="sub">宏观策略 &middot; 行业配置 &middot; 产品分析</span></div>
+    <div class="rgrid" id="rgrid"></div>
+  </div>
+  <div class="pn" id="pn3">
+    <div class="sec-title">香港ETF实时资金流 <span class="sub">来源: CSOP</span></div>
+    <div class="flow-tabs">
+      <div class="ftab ac" id="ftabin" onclick="sf('in')">&#x2B06; 资金流入排行</div>
+      <div class="ftab" id="ftabout" onclick="sf('out')">&#x2B07; 资金流出排行</div>
+    </div>
+    <div id="finsec" class="fsection ac">
+      <div class="ftbl"><table><thead><tr><th style="width:40px">#</th><th>基金</th><th style="text-align:right">净流入（USD）</th></tr></thead><tbody id="flowintable"></tbody></table></div>
+    </div>
+    <div id="foutsec" class="fsection">
+      <div class="ftbl"><table><thead><tr><th style="width:40px">#</th><th>基金</th><th style="text-align:right">净流出（USD）</th></tr></thead><tbody id="flowouttable"></tbody></table></div>
+    </div>
+  </div>
+</div>
+<div class="modal" id="modal" onclick="if(event.target===this)cm()">
+  <div class="mbox">
+    <div class="mhead">
+      <div class="mtitle" id="mtitle"></div>
+      <button class="mclose" onclick="cm()">&#x2715;</button>
+    </div>
+    <div class="mbody" id="mbody"></div>
+  </div>
+</div>
+<script>
+// ===== QUOTE DATA =====
+const QT = {
+  '513130.SH':{last:0.616,prev:0.610,chg:0.98,up:true,vol:61986377,turnover:3849236978,turnoverStr:'38.5亿',scale:'456亿',type:'qdii',nav:0.615,premium:0.16,flow1d:'+2.3亿',flow1m:'+18.5亿',index:'恒生科技指数',region:'香港 100%',desc:'聚焦香港上市规模最大的30家科技龙头'},
+  '159687.SZ':{last:1.683,prev:1.669,chg:0.84,up:true,vol:462741,turnover:78411284,turnoverStr:'7.84亿',scale:'15亿',type:'qdii',nav:1.680,premium:0.18,flow1d:'-0.3亿',flow1m:'-1.2亿',index:'富时亚太低碳精选指数',region:'台湾32% 韩国19% 日本18%',desc:'覆盖亚太发达及新兴市场，低碳主题筛选'},
+  '513730.SH':{last:1.251,prev:1.248,chg:0.24,up:true,vol:251671,turnover:31683786,turnoverStr:'3.17亿',scale:'13亿',type:'qdii',nav:1.250,premium:0.08,flow1d:'+0.8亿',flow1m:'+3.5亿',index:'新交所泛东南亚科技指数',region:'泰国35% 印尼25% 新加坡22%',desc:'聚焦东南亚科技产业，受益于数字化转型红利'},
+  '159329.SZ':{last:0.957,prev:0.959,chg:-0.21,up:false,vol:266005,turnover:25500639,turnoverStr:'2.55亿',scale:'13亿',type:'qdii',nav:0.958,premium:-0.10,flow1d:'+0.5亿',flow1m:'+2.1亿',index:'富时沙特阿拉伯指数',region:'沙特100%',desc:'布局沙特阿拉伯，能源+金融双轮驱动'},
+  '520830.SH':{last:0.946,prev:0.947,chg:-0.11,up:false,vol:424892,turnover:40238960,turnoverStr:'4.02亿',scale:'12.7亿',type:'qdii',nav:0.947,premium:-0.11,flow1d:'-0.2亿',flow1m:'+1.8亿',index:'富时沙特阿拉伯指数',region:'沙特100%',desc:'布局沙特阿拉伯，能源+金融双轮驱动'},
+  '159822.SZ':{last:0.659,prev:0.652,chg:1.07,up:true,vol:241796,turnover:15989110,turnoverStr:'1.60亿',scale:'2.6亿',type:'qdii',nav:0.658,premium:0.15,flow1d:'+0.1亿',flow1m:'+0.4亿',index:'新经济主题指数',region:'中国80% 台湾12%',desc:'捕捉中国新经济转型机遇，消费+科技+医疗为主'},
+  '2830.HK':{last:83.700,prev:83.440,chg:0.31,up:true,vol:930,turnover:77838,turnoverStr:'7.8万',scale:'-',type:'hks',nav:83.5,premium:0.24,flow1d:'+1.2亿',flow1m:'+5.8亿',index:'富时沙特阿拉伯指数',region:'沙特100%',desc:'布局沙特阿拉伯，能源+金融双轮驱动'},
+  '3442.HK':{last:8.180,prev:8.060,chg:1.49,up:true,vol:309900,turnover:2542265,turnoverStr:'254万',scale:'-',type:'hks',nav:8.15,premium:0.37,flow1d:'+3.5亿',flow1m:'+18.2亿',index:'恒生港美科技指数',region:'中国61% 美国39%',desc:'同时覆盖香港与美国科技龙头'},
+  '3441.HK':{last:11.650,prev:11.620,chg:0.26,up:true,vol:608100,turnover:7101058,turnoverStr:'710万',scale:'-',type:'hks',nav:11.62,premium:0.26,flow1d:'+1.8亿',flow1m:'+9.5亿',index:'富时东西股票精选指数',region:'香港78% 美国15%',desc:'同时布局香港蓝筹与美国科技龙头'},
+};
+// ===== HOLDINGS DATA (from Excel) =====
+const HOLD = {
+  '513130.SH':[
+    ['腾讯控股','0700.HK',9.50,'香港'],['阿里巴巴','9988.HK',8.20,'香港'],['美团','3690.HK',7.80,'香港'],['小米集团','1810.HK',6.50,'香港'],['京东集团','9618.HK',5.20,'香港'],['网易','9999.HK',4.10,'香港'],['百度集团','9888.HK',3.20,'香港'],['联想集团','0992.HK',2.80,'香港'],['快手','1024.HK',2.50,'香港'],['商汤','0020.HK',1.90,'香港'],
+  ],
+  '159687.SZ':[
+    ['台积电','2330.TW',11.49,'台湾'],['三星电子','005930.KS',5.40,'韩国'],['腾讯控股','0700.HK',3.60,'香港'],['阿里巴巴','9988.HK',2.60,'香港'],['丰田汽车','7203.T',2.18,'日本'],['爱思开海力士','000660.KS',2.13,'韩国'],['澳洲联邦银行','CBA.AX',2.03,'澳大利亚'],['三菱UFJ金融','8306.T',1.82,'日本'],['东京威力科创','8035.T',1.54,'日本'],['爱德万测试','6857.T',1.45,'日本'],
+  ],
+  '513730.SH':[
+    ['台达电子(泰国)','DELTA.BK',14.65,'泰国'],['阿斯特拉国际','ASII.JK',9.61,'印尼'],['威普罗','WIT',9.53,'印度'],['印福思','INFY',9.28,'印度'],['Grab控股','GRAB',9.16,'新加坡'],['Sea Limited','SE',8.27,'新加坡'],['Venture Corp','V03.SI',5.95,'新加坡'],['GoTo Gojek','GOTO.JK',5.39,'印尼'],['森那美公司','4197.KL',5.30,'马来西亚'],['奕丰集团','AIY.SI',2.84,'新加坡'],
+  ],
+  '159329.SZ':[
+    ['拉吉希银行','1120.SR',15.63,'沙特'],['沙特阿美','2222.SR',12.16,'沙特'],['沙特国家银行','1180.SR',9.49,'沙特'],['沙特采矿公司','1211.SR',7.18,'沙特'],['沙特电信','7010.SR',6.04,'沙特'],['沙特基础工业','2010.SR',3.99,'沙特'],['利雅德银行','1010.SR',3.21,'沙特'],['ACWA电力','2082.SR',2.81,'沙特'],['沙特Awwal银行','1060.SR',2.74,'沙特'],['沙特基础工业农营','2020.SR',2.71,'沙特'],
+  ],
+  '520830.SH':[
+    ['拉吉希银行','1120.SR',15.63,'沙特'],['沙特阿美','2222.SR',12.16,'沙特'],['沙特国家银行','1180.SR',9.49,'沙特'],['沙特采矿公司','1211.SR',7.18,'沙特'],['沙特电信','7010.SR',6.04,'沙特'],['沙特基础工业','2010.SR',3.99,'沙特'],['利雅德银行','1010.SR',3.21,'沙特'],['ACWA电力','2082.SR',2.81,'沙特'],['沙特Awwal银行','1060.SR',2.74,'沙特'],['沙特基础工业农营','2020.SR',2.71,'沙特'],
+  ],
+  '159822.SZ':[
+    ['阿里巴巴','9988.HK',9.20,'中国'],['腾讯控股','0700.HK',8.50,'中国'],['美团','3690.HK',7.10,'中国'],['京东集团','9618.HK',5.80,'中国'],['小米集团','1810.HK',5.20,'中国'],['网易','9999.HK',4.50,'中国'],['比亚迪','002594.SZ',3.80,'中国'],['宁德时代','300750.SZ',3.20,'中国'],['恒瑞医药','600276.SH',2.80,'中国'],['迈瑞医疗','300760.SZ',2.50,'中国'],
+  ],
+  '2830.HK':[
+    ['拉吉希银行','1120.SR',15.63,'沙特'],['沙特阿美','2222.SR',12.16,'沙特'],['沙特国家银行','1180.SR',9.49,'沙特'],['沙特采矿公司','1211.SR',7.18,'沙特'],['沙特电信','7010.SR',6.04,'沙特'],['沙特基础工业','2010.SR',3.99,'沙特'],['利雅德银行','1010.SR',3.21,'沙特'],['ACWA电力','2082.SR',2.81,'沙特'],['沙特Awwal银行','1060.SR',2.74,'沙特'],['沙特基础工业农营','2020.SR',2.71,'沙特'],
+  ],
+  '3442.HK':[
+    ['美团-W','3690.HK',7.56,'中国'],['比亚迪','1211.HK',7.13,'中国'],['腾讯控股','0700.HK',6.46,'中国'],['小米集团','1810.HK',6.39,'中国'],['阿里巴巴','9988.HK',6.08,'中国'],['中芯国际','0981.HK',5.79,'中国'],['亚马逊','AMZN',5.76,'美国'],['英伟达','NVDA',5.28,'美国'],['Alphabet','GOOGL',5.27,'美国'],['苹果','AAPL',4.98,'美国'],
+  ],
+  '3441.HK':[
+    ['汇丰控股','0005.HK',5.68,'英国'],['中银香港','2388.HK',5.44,'香港'],['中电控股','0002.HK',5.06,'香港'],['电能实业','0006.HK',4.91,'香港'],['长实集团','1113.HK',4.77,'香港'],['万洲国际','0288.HK',4.69,'香港'],['香港中华煤气','0003.HK',4.39,'香港'],['联想集团','0992.HK',4.33,'香港'],['港铁公司','0066.HK',2.93,'香港'],
+  ],
+};
+// ===== INTRADAY CHART DATA (today) =====
+const IDATA = {
+  '513130.SH':[["09:30",0.621,0.610],["09:31",0.622,0.611],["09:32",0.622,0.612],["09:33",0.623,0.612],["09:34",0.624,0.613],["09:35",0.623,0.613],["09:36",0.622,0.613],["09:37",0.621,0.613],["09:38",0.620,0.613],["09:39",0.619,0.612],["09:40",0.618,0.611],["09:41",0.617,0.610],["09:42",0.616,0.609],["09:43",0.615,0.609],["09:44",0.614,0.608],["09:45",0.613,0.608],["09:46",0.612,0.607],["09:47",0.611,0.606],["09:48",0.610,0.606],["09:49",0.609,0.605],["09:50",0.608,0.604],["09:51",0.609,0.603],["09:52",0.610,0.602],["09:53",0.611,0.602],["09:54",0.612,0.601],["09:55",0.613,0.600],["09:56",0.614,0.600],["09:57",0.615,0.599],["09:58",0.616,0.598],["09:59",0.617,0.598],["10:00",0.618,0.597],["10:01",0.619,0.596],["10:02",0.620,0.596],["10:03",0.621,0.595],["10:04",0.622,0.595],["10:05",0.623,0.594],["10:06",0.624,0.594],["10:07",0.625,0.593],["10:08",0.626,0.593],["10:09",0.627,0.592],["10:10",0.628,0.592],["10:11",0.629,0.591],["10:12",0.630,0.591],["10:13",0.631,0.590],["10:14",0.630,0.589],["10:15",0.629,0.589],["10:16",0.628,0.588],["10:17",0.627,0.588],["10:18",0.626,0.587],["10:19",0.625,0.587],["10:20",0.624,0.586],["10:21",0.623,0.586],["10:22",0.622,0.585],["10:23",0.621,0.585],["10:24",0.620,0.584],["10:25",0.619,0.584],["10:26",0.618,0.583],["10:27",0.617,0.583],["10:28",0.616,0.582],["10:29",0.615,0.582],["10:30",0.614,0.581],["10:31",0.613,0.581],["10:32",0.612,0.580],["10:33",0.611,0.580],["10:34",0.610,0.579],["10:35",0.609,0.579],["10:36",0.608,0.578],["10:37",0.607,0.578],["10:38",0.606,0.577],["10:39",0.605,0.577],["10:40",0.604,0.576],["10:41",0.603,0.576],["10:42",0.602,0.575],["10:43",0.601,0.575],["10:44",0.600,0.574],["10:45",0.599,0.574],["10:46",0.598,0.573],["10:47",0.597,0.573],["10:48",0.596,0.572],["10:49",0.595,0.572],["10:50",0.594,0.571],["10:51",0.593,0.571],["10:52",0.592,0.570],["10:53",0.591,0.570],["10:54",0.590,0.569],["10:55",0.589,0.569],["10:56",0.588,0.568],["10:57",0.587,0.568],["10:58",0.586,0.567],["10:59",0.585,0.567],["11:00",0.584,0.566],["11:01",0.583,0.566],["11:02",0.582,0.565],["11:03",0.581,0.565],["11:04",0.580,0.564],["11:05",0.579,0.564],["11:06",0.578,0.563],["11:07",0.577,0.563],["11:08",0.576,0.562],["11:09",0.575,0.562],["11:10",0.574,0.561],["11:11",0.573,0.561],["11:12",0.572,0.560],["11:13",0.571,0.560],["11:14",0.570,0.559],["11:15",0.569,0.559],["11:16",0.568,0.558],["11:17",0.567,0.558],["11:18",0.566,0.557],["11:19",0.565,0.557],["11:20",0.564,0.556],["11:21",0.563,0.556],["11:22",0.562,0.555],["11:23",0.561,0.555],["11:24",0.560,0.554],["11:25",0.559,0.554],["11:26",0.558,0.553],["11:27",0.557,0.553],["11:28",0.556,0.552],["11:29",0.555,0.552],["11:30",0.554,0.551],["13:01",0.613,0.610],["13:02",0.612,0.610],["13:03",0.611,0.610],["13:04",0.610,0.610],["13:05",0.609,0.610],["13:06",0.608,0.610],["13:07",0.607,0.610],["13:08",0.606,0.610],["13:09",0.605,0.610],["13:10",0.604,0.610],["13:11",0.605,0.610],["13:12",0.606,0.610],["13:13",0.607,0.610],["13:14",0.608,0.610],["13:15",0.609,0.610],["13:16",0.610,0.610],["13:17",0.611,0.610],["13:18",0.612,0.610],["13:19",0.613,0.610],["13:20",0.614,0.610],["13:21",0.615,0.610],["13:22",0.616,0.610],["13:23",0.617,0.610],["13:24",0.616,0.610],["13:25",0.615,0.610],["13:26",0.614,0.610],["13:27",0.613,0.610],["13:28",0.612,0.610],["13:29",0.611,0.610],["13:30",0.610,0.610],["13:31",0.611,0.610],["13:32",0.612,0.610],["13:33",0.613,0.610],["13:34",0.614,0.610],["13:35",0.615,0.610],["13:36",0.616,0.610],["13:37",0.617,0.610],["13:38",0.616,0.610],["13:39",0.615,0.610],["13:40",0.614,0.610],["13:41",0.613,0.610],["13:42",0.612,0.610],["13:43",0.611,0.610],["13:44",0.612,0.610],["13:45",0.613,0.610],["13:46",0.614,0.610],["13:47",0.615,0.610],["13:48",0.616,0.610],["13:49",0.617,0.610],["13:50",0.616,0.610],["13:51",0.615,0.610],["13:52",0.614,0.610],["13:53",0.613,0.610],["13:54",0.612,0.610],["13:55",0.611,0.610],["13:56",0.612,0.610],["13:57",0.613,0.610],["13:58",0.614,0.610],["13:59",0.615,0.610],["14:00",0.616,0.610]],
+};
+// ===== RESEARCH DATA =====
+const REPORTS = [
+  {title:'恒生科技ETF：回调提供中长线布局窗口',src:'机构观点',date:'2026-04-14',market:'香港',sentiment:'看多',type:'产品分析',tag1:'香港',tag2:'科技',summary:'恒生科技指数近期随大市回调，腾讯、阿里等权重股估值回落至历史中位数附近。长期来看，平台经济监管边际改善、AI商业化加速，恒生科技具备配置价值。建议逢低布局。'},
+  {title:'亚太精选ETF：区域分散化优选，低碳主题长线看好',src:'机构观点',date:'2026-04-12',market:'亚太',sentiment:'看多',type:'产品分析',tag1:'亚太',tag2:'低碳',summary:'全球ETF资金持续流入亚太新兴市场。亚太精选覆盖台湾晶片、韩国半导体、日本金融，区域分散化效果显著。低碳筛选排除高碳排放企业，符合ESG趋势。'},
+  {title:'东南亚科技ETF：数字化红利释放，增速领跑新兴市场',src:'机构观点',date:'2026-04-11',market:'东南亚',sentiment:'看多',type:'行业配置',tag1:'东南亚',tag2:'科技',summary:'东南亚数字经济规模预计2030年达6000亿美元，Grab、Sea、GoTo等平台渗透率仍低。印度IT外包景气度高，塔塔、印福思受益于AI需求爆发。区域金融科技加速渗透。'},
+  {title:'沙特阿拉伯ETF：能源+金融双核驱动，受益于沙国转型',src:'机构观点',date:'2026-04-10',market:'中东',sentiment:'中性',type:'产品分析',tag1:'沙特',tag2:'能源',summary:'OPEC+减产支撑油价区间运行，沙特阿美股息收益率逾5%。Vision 2030推动经济多元化，旅游业与金融业快速发展。卡塔尔、迪拜交易所估值偏高，沙特估值更具吸引力。'},
+  {title:'港美科技配置：中美科技龙头一站式覆盖',src:'机构观点',date:'2026-04-14',market:'全球',sentiment:'看多',type:'产品分析',tag1:'香港',tag2:'美国',tag3:'科技',summary:'香港科技股估值处于历史底部，美股科技龙头NVDA、AAPL等业绩超预期。港美科技指数同时覆盖两大市场，兼顾防御性与成长性。'},
+  {title:'新经济ETF：政策利好密集发布，内需赛道迎来拐点',src:'机构观点',date:'2026-04-09',market:'中国',sentiment:'看多',type:'行业配置',tag1:'中国',tag2:'新经济',summary:'促消费政策密集出台，以旧换新补贴加码。新经济指数聚焦消费+科技+医疗，受益于消费复苏与产业升级。指数成分股基本面边际改善，估值具吸引力。'},
+];
+// ===== FLOW DATA =====
+const FLOW_IN = [
+  ['恒生港美科技ETF','3442.HK','+3.52亿'],['东西精选ETF','3441.HK','+1.81亿'],['沙特ETF','2830.HK','+1.23亿'],['恒生科技ETF','513130.SH','+0.95亿'],['亚太精选ETF','159687.SZ','+0.45亿'],['东南亚科技ETF','513730.SH','+0.38亿'],['新经济ETF','159822.SZ','+0.12亿'],
+];
+const FLOW_OUT = [
+  ['MS印度ETF','4366.HK','-0.82亿'],['中国消费ETF','2800.HK','-0.65亿'],['港交所ETF','3033.HK','-0.41亿'],['东盟ETF','2812.HK','-0.33亿'],['标普500ETF','3141.HK','-0.28亿'],['欧洲ETF','2810.HK','-0.19亿'],['日经ETF','3150.HK','-0.15亿'],
+];
+// ===== FUNCTIONS =====
+let curSort='chg',curDir='desc';
+function sw(i){document.querySelectorAll('.ta').forEach((t,j)=>t.classList.toggle('ac',j===i));document.querySelectorAll('.pn').forEach((p,j)=>p.classList.toggle('ac',j===i));}
+function cm(){document.getElementById('modal').classList.remove('open')}
+function sf(d){document.getElementById('ftabin').classList.toggle('ac',d==='in');document.getElementById('ftabout').classList.toggle('ac',d==='out');document.getElementById('finsec').classList.toggle('ac',d==='in');document.getElementById('foutsec').classList.toggle('ac',d==='out');}
+function cc(v){try{const n=parseFloat(v);if(isNaN(n))return'vg';return n>=0?'vg':'vr';}catch(e){return'vg';}}
+function fmt(v){try{const n=parseFloat(v);if(isNaN(n))return v;return(n>=0?'+':'')+n.toFixed(2);}catch(e){return v;}}
+
+function renderETFTbl(){
+  const keys = Object.keys(QT);
+  let rows = keys.map(k=>({k,...QT[k]})).sort((a,b)=>{
+    let av=a[curSort],bv=b[curSort];
+    if(typeof av==='string'){av=av.toLowerCase();bv=bv.toLowerCase();}
+    if(av<bv)return curDir==='asc'?1:-1;if(av>bv)return curDir==='asc'?-1:1;return 0;
+  });
+  document.getElementById('etftbody').innerHTML=rows.map(r=>{
+    const ch=r.chg>=0?'vg':'vr',pm=r.premium>=0?'vg':'vr';
+    const typeTag=r.type==='hks'?'<span class="tag-b">港股通</span>':'<span class="tag-o">QDII</span>';
+    return `<tr onclick="openM('${r.k}')" style="cursor:pointer">\
+<td><div style="font-weight:700">${r.index.split('指数')[0]}ETF</div><div style="font-size:11px;color:var(--dim);margin-top:2px">${r.k}</div></td>\
+<td class="nm ${ch}">${r.chg>=0?'+':''}${r.chg.toFixed(2)}%</td>\
+<td class="nm">${r.last}</td>\
+<td class="nm" style="color:var(--text2)">${r.turnoverStr}</td>\
+<td class="nm ${pm}">${r.premium>=0?'+':''}${r.premium.toFixed(2)}%</td>\
+<td class="nm ${cc(r.flow1d)}">${r.flow1d}</td>\
+<td class="nm ${cc(r.flow1m)}">${r.flow1m}</td>\
+<td style="font-size:12px;color:var(--dim)">${r.index}</td>\
+<td style="font-size:11px;color:var(--dim);max-width:140px">${r.region}</td>\
+</tr>`;
+  }).join('');
+  // Update sort indicators
+  document.querySelectorAll('.th-sort').forEach(th=>{
+    th.classList.remove('sorted','asc','desc');
+    if(th.dataset.sort===curSort){th.classList.add('sorted',curDir);}
+  });
+}
+
+document.getElementById('etftbl').querySelector('thead').addEventListener('click',e=>{
+  if(e.target.closest('.th-sort')){
+    const th=e.target.closest('.th-sort');const s=th.dataset.sort;
+    if(s===curSort)curDir=curDir==='desc'?'asc':'desc';else{curSort=s;curDir='desc';}
+    renderETFTbl();
+  }
+});
+
+function openM(code){
+  const d=QT[code];if(!d)return;
+  const title=`${d.index}ETF (${code})`;
+  document.getElementById('mtitle').textContent=title;
+  const ch=d.chg>=0?'vg':'vr',pm=d.premium>=0?'vg':'vr';
+  let html=`<div class="mprice-row">\
+<div><div class="mnav ${ch}">${d.last}</div><div class="mchg ${ch}">${d.chg>=0?'+':''}${d.chg.toFixed(2)}%</div></div>\
+<div class="mprice-block"><div style="font-size:12px;color:var(--dim)">昨日收盘</div><div style="font-size:18px;font-weight:800">${d.prev}</div></div>\
+<div class="mprice-block"><div style="font-size:12px;color:var(--dim)">估算净值</div><div style="font-size:18px;font-weight:800">${d.nav}</div></div>\
+<div class="mprice-block"><div style="font-size:12px;color:var(--dim)">折溢价</div><div style="font-size:18px;font-weight:800 ${pm}">${pm==='vg'?'+':''}${d.premium.toFixed(2)}%</div></div>\
+</div>\
+<div class="mmeta">\
+<span>&#x1F4C8 ${d.index}</span>\
+<span>&#x1F30D ${d.region}</span>\
+<span>&#x1F4B0 ${d.turnoverStr}成交</span>\
+<span>&#x2193 ${d.flow1d}昨日净流入</span>\
+</div>\
+<div class="chart-wrap">\
+<div class="chart-title">分时走势 vs 昨日收盘</div>\
+<canvas id="kchart"></canvas>\
+<div class="chart-legend"><span><span class="cline cline-p"></span>实时价格</span><span><span class="cline cline-v"></span>昨日收盘线</span></div>\
+</div>`;
+
+  // Holdings
+  const hd=HOLD[code]||[];
+  if(hd.length>0){
+    html+=`<div class="hsec"><h4>前十大持仓</h4><div class="mtbl"><table><thead><tr><th>#</th><th>名称</th><th>代码</th><th>地区</th><th>权重</th></tr></thead><tbody>`;
+    html+=hd.map((r,i)=>`<tr><td class="rank">${i+1}</td><td style="font-weight:600">${r[0]}</td><td style="color:var(--dim);font-size:11px">${r[1]}</td><td><span class="tag-d">${r[3]}</span></td><td class="nm vg">${r[2].toFixed(2)}%</td></tr>`).join('');
+    html+=`</tbody></table></div></div>`;
+  }
+  document.getElementById('mbody').innerHTML=html;
+  document.getElementById('modal').classList.add('open');
+  drawChart(code);
+}
+
+function drawChart(code){
+  const canvas=document.getElementById('kchart');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const data=IDATA[code]||[];
+  if(data.length===0)return;
+  const W=canvas.offsetWidth,H=160;
+  canvas.width=W;canvas.height=H;
+  const prices=data.map(d=>d[1]),refs=data.map(d=>d[2]);
+  const min=Math.min(...prices,...refs),max=Math.max(...prices,...refs);
+  const pad=8,top=10,bottom=10;
+  const innerH=H-top-bottom,innerW=W-pad*2;
+  const scaleY=v=>top+innerH-(v-min)/(max-min)*innerH;
+  const scaleX=i=>pad+i*(innerW/(data.length-1));
+  ctx.clearRect(0,0,W,H);
+  // Grid
+  ctx.strokeStyle='#f0f0f5';ctx.lineWidth=0.5;
+  for(let i=0;i<=4;i++){const y=top+i*innerH/4;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(W-pad,y);ctx.stroke();}
+  // Ref line
+  const refY=scaleY(refs[0]);
+  ctx.strokeStyle='#f97316';ctx.lineWidth=1;ctx.setLineDash([4,3]);
+  ctx.beginPath();ctx.moveTo(pad,refY);ctx.lineTo(W-pad,refY);ctx.stroke();
+  ctx.setLineDash([]);
+  // Price line fill
+  const grad=ctx.createLinearGradient(0,top,0,H-bottom);
+  grad.addColorStop(0,'rgba(59,130,246,0.15)');grad.addColorStop(1,'rgba(59,130,246,0)');
+  ctx.fillStyle=grad;
+  ctx.beginPath();ctx.moveTo(scaleX(0),scaleY(prices[0]));
+  prices.forEach((p,i)=>{if(i>0)ctx.lineTo(scaleX(i),scaleY(p));});
+  ctx.lineTo(scaleX(prices.length-1),H-bottom);ctx.lineTo(scaleX(0),H-bottom);ctx.closePath();ctx.fill();
+  // Price line
+  ctx.strokeStyle='#3b82f6';ctx.lineWidth=2;
+  ctx.beginPath();prices.forEach((p,i)=>{i===0?ctx.moveTo(scaleX(i),scaleY(p)):ctx.lineTo(scaleX(i),scaleY(p));});
+  ctx.stroke();
+  // Time labels
+  ctx.fillStyle='#8892a8';ctx.font='10px sans-serif';ctx.textAlign='center';
+  const step=Math.floor(data.length/4);
+  [0,step,step*2,step*3,data.length-1].forEach(i=>{if(data[i])ctx.fillText(data[i][0],scaleX(i),H-2);});
+}
+
+function renderResearch(){
+  document.getElementById('rgrid').innerHTML=REPORTS.map(r=>{
+    const stag=r.sentiment==='看多'?'rtag-g':r.sentiment==='看空'?'rtag-r':'rtag-b';
+    return `<div class="rcard">\
+<div class="rtop"><span class="rtag ${stag}">${r.market} · ${r.sentiment}</span><span class="rdate">${r.date}</span></div>\
+<div class="rtitle">${r.title}</div>\
+<div class="rsummary">${r.summary}</div>\
+<div class="rfooter"><span class="rsrc">${r.src}</span><div class="rtags">${[r.tag1,r.tag2,r.tag3].filter(Boolean).map(t=>`<span>${t}</span>`).join('')}</div></div>\
+</div>`;
+  }).join('');
+}
+
+function renderFlow(){
+  document.getElementById('flowintable').innerHTML=FLOW_IN.map((r,i)=>`<tr><td class="rnum">${i+1}</td><td><div class="fname">${r[0]}</div><div class="fcode">${r[1]}</div></td><td class="famt fin">${r[2]}</td></tr>`).join('');
+  document.getElementById('flowouttable').innerHTML=FLOW_OUT.map((r,i)=>`<tr><td class="rnum">${i+1}</td><td><div class="fname">${r[0]}</div><div class="fcode">${r[1]}</div></td><td class="famt fout">${r[2]}</td></tr>`).join('');
+}
+
+document.getElementById('upt').textContent='更新: '+new Date().toLocaleTimeString('zh-CN');
+document.addEventListener('keydown',function(e){if(e.key==='Escape')cm();});
+renderETFTbl();
+renderResearch();
+renderFlow();
+</script>
+</body>
+</html>

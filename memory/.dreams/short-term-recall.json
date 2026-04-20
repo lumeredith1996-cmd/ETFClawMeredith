@@ -1,0 +1,220 @@
+{
+  "version": 1,
+  "updatedAt": "2026-04-19T23:26:24.202Z",
+  "entries": {
+    "memory:memory/2026-04-15.md:55:86": {
+      "key": "memory:memory/2026-04-15.md:55:86",
+      "path": "memory/2026-04-15.md",
+      "startLine": 55,
+      "endLine": 86,
+      "source": "memory",
+      "snippet": "- `kol-timeline.html`：完整时间轴页面，咖位分级（High金/Medium蓝/Low灰/KOC绿），平台筛选（雪球/公众号/微博/小红书/支付宝/B站/视频号），样式深色主题 - Cloudflare隧道：`cloudflare tunnel --url http://localhost:8765` 监听端口8765 ### 技术要点 - 数据用Python脚本生成JSON，输出到 `/tmp/kol_feed.json`（184 KOL + 67动态） - HTML通过fetch()读取 `file:///tmp/kol_feed.json`（绕过CORS） - 页面刷新逻辑：手动点\"🔄 更新动态\"按钮，动态重新生成（带时间戳变化） - 隧道进程名含 `node-local-website` 或 `kol-timeline` - 页面访问地址（需等隧道稳定后确认） ### 关键变量 - Bitable app_token: `ZKTqb1BQBaPbubsay3rcyydvnko` - Table ID: `tblteGKNZ6ZoRofB` - Wiki节点token: `NaCTwa59qiEPKrkwNpLc0mVonOe` - Space ID: `7616689702317444033` ### 待办 - [ ] 验证隧道公网URL并告知用户 - [ ] 用户确认是否需要接入真实数据源（雪球API等）替代模拟数据 - [ ] 后续可在飞书All产品sheet中创建新Tab承载此时间轴 ### 文件路径 - `/root/.opencla",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "totalScore": 0.6740786485107486,
+      "maxScore": 0.6740786485107486,
+      "firstRecalledAt": "2026-04-15T23:04:13.482Z",
+      "lastRecalledAt": "2026-04-15T23:04:13.482Z",
+      "queryHashes": [
+        "79ef81b547ad"
+      ],
+      "recallDays": [
+        "2026-04-16"
+      ],
+      "conceptTags": [
+        "kol-timeline.html",
+        "high金/medium蓝/low灰/koc绿",
+        "雪球/公众号/微博/小红书/支付宝/b站/视频号",
+        "tmp/kol-feed.json",
+        "node-local-website",
+        "kol-timeline",
+        "app-token",
+        "kol"
+      ]
+    },
+    "memory:memory/2026-04-15.md:76:113": {
+      "key": "memory:memory/2026-04-15.md:76:113",
+      "path": "memory/2026-04-15.md",
+      "startLine": 76,
+      "endLine": 113,
+      "source": "memory",
+      "snippet": "### 文件路径 - `/root/.openclaw/workspace/kol-timeline.html` - `/root/.openclaw/workspace/gen_kol.py` - `/tmp/kol_feed.json` --- ## ETF地图 v7/v8 优化（22:00后） ### all产品.xlsx - 新权威数据源 - 文件：`/root/.openclaw/media/inbound/alläº_å---39b53832-0c03-4f14-a52d-76a6d053448a.xlsx` - Sheet: `products_all`，5列：地区 / 分类 / 代码 / 产品名 / 备注 - 共110个产品（内地可买64 / 境外可买46） - 分类体系完全重做，比v6更全面 ### 分类体系（v8） **内地可买（8个子类）** - QDII ETF（11只）：513130/159687/513730/159822/159329/520830/03441/03442/03174/03443/03469 - QDII 联接基金（14只）：020-022开头，各渠道代销 - 港股通ETF（12只） - 跨境理财通-权益（8只）：03431/03432/03037等 - 跨境理财通-货币（7只）：港元/美元/人民币货币ETF - 跨境理财通-固收（5只） - 跨境理财通-基金互认（7只） **境外可买（12个子类）** - 香港：权益/债券/货币/REITs/杠反 - 美国：科技/大盘/生物科技/中国概念 - A股：A50/创业板/科创板",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "totalScore": 0.6672032744593025,
+      "maxScore": 0.6672022510059558,
+      "firstRecalledAt": "2026-04-15T23:04:13.482Z",
+      "lastRecalledAt": "2026-04-19T23:26:24.202Z",
+      "queryHashes": [
+        "79ef81b547ad",
+        "ed9450a86276"
+      ],
+      "recallDays": [
+        "2026-04-16",
+        "2026-04-20"
+      ],
+      "conceptTags": [
+        "openclaw/workspace/gen-kol.py",
+        "tmp/kol-feed.json",
+        "v7/v8",
+        "all产品.xlsx",
+        "openclaw/media/inbound/alläo-å",
+        "products-all",
+        "020-022开头",
+        "跨境理财通-权益"
+      ]
+    },
+    "memory:memory/2026-04-15.md:106:140": {
+      "key": "memory:memory/2026-04-15.md:106:140",
+      "path": "memory/2026-04-15.md",
+      "startLine": 106,
+      "endLine": 140,
+      "source": "memory",
+      "snippet": "- 新兴市场：越南/东南亚 - 个股杠反ETF（2倍做多/做空） - 指数杠反ETF - 加密货币期货ETF（比特币/以太币） ### 行情匹配结果 - 87个产品匹配到v7行情数据 - 23个无行情（联接基金12只 + ISIN理财通3只 + 新加坡8只） - 所有产品均已写入 `/tmp/v8_data.json` ### v7补丁（已应用到etf-map-v7.html） 1. stopPropagation：排序th点击不再触发行onclick 2. 红涨绿跌：`.up{color:#dc2626}` / `.down{color:#16a34a}` 3. 备注列：每行显示`备注`tag，悬停显示全文 4. 批量替换`ALL_PRODUCTS=`数组为110产品 5. 替换HOLIDAYS/HOLD/IDATA/REPORTS数据块 6. `renderTable()` 重写，过滤/排序/SearchBox 7. 两级分类筛选内地/境外重构 8. `tagCat()` 重写，精确匹配各子类样式 9. `openM()` modal加指数/分类/地区标签 10. `sort click handler`加stopPropagation ### v8重建（build_v8.py + gen_v8.py） - 独立Python脚本读取Excel + v7数据，生成干净HTML - 分类体系与Excel完全对应 - 每行备注列显示`*`tag，title=备注全文 - `etf-map-v8.html`（最新版本） ### HTTP服务器 - 端口3000：`pytho",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "totalScore": 0.6015024002264229,
+      "maxScore": 0.6015013484297059,
+      "firstRecalledAt": "2026-04-15T23:04:13.482Z",
+      "lastRecalledAt": "2026-04-19T23:26:24.202Z",
+      "queryHashes": [
+        "79ef81b547ad",
+        "ed9450a86276"
+      ],
+      "recallDays": [
+        "2026-04-16",
+        "2026-04-20"
+      ],
+      "conceptTags": [
+        "越南/东南亚",
+        "2倍做多/做空",
+        "比特币/以太币",
+        "tmp/v8-data.json",
+        "已应用到etf-map-v7.html",
+        "all-products",
+        "替换holidays/hold/idata/reports数据块",
+        "过滤/排序/searchbox"
+      ]
+    },
+    "memory:memory/2026-04-16.md:1:21": {
+      "key": "memory:memory/2026-04-16.md:1:21",
+      "path": "memory/2026-04-16.md",
+      "startLine": 1,
+      "endLine": 21,
+      "source": "memory",
+      "snippet": "## 2026-04-15 Session Memory ### ETF Map Project (etf-map-v8 → v9) **Files:** - v7 base: `/root/.openclaw/workspace/etf-map-v7.html` — working, used as template - v8: `/root/.openclaw/workspace/etf-map-v8.html` — 53KB, deployed at `trycloudflare.com/etf-map-v8.html` - v9: `/root/.openclaw/workspace/etf-map-v9.html` — 65KB, deployed at `trycloudflare.com/etf-map-v9.html` - Build scripts: `/tmp/build_v7.py`, `/tmp/build_v8.py`, `/tmp/build_v9_final.py`, `/tmp/fix_all_v2.py` - Data: `/tmp/v7_data.json`, `/tmp/v9_products.json`, `/tmp/ap9.js` **Key bugs fixed this session:** 1. **curSub initialization bug** — `curSub='QDII-ETF'` caused 0 rows initially. Fixed to `curSub=null` so all 31 main",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "totalScore": 0.0000015039801380729353,
+      "maxScore": 0.0000015039801380729353,
+      "firstRecalledAt": "2026-04-19T23:26:24.202Z",
+      "lastRecalledAt": "2026-04-19T23:26:24.202Z",
+      "queryHashes": [
+        "ed9450a86276"
+      ],
+      "recallDays": [
+        "2026-04-20"
+      ],
+      "conceptTags": [
+        "etf-map-v8",
+        "tmp/build-v7.py",
+        "tmp/build-v8.py",
+        "tmp/build-v9-final.py",
+        "tmp/fix-all-v2.py",
+        "tmp/v7-data.json",
+        "tmp/v9-products.json",
+        "tmp/ap9.js"
+      ]
+    },
+    "memory:memory/2026-04-16.md:33:64": {
+      "key": "memory:memory/2026-04-16.md:33:64",
+      "path": "memory/2026-04-16.md",
+      "startLine": 33,
+      "endLine": 64,
+      "source": "memory",
+      "snippet": "Use v7 HTML as template (it has correct structure), replace only the `const ALL_PRODUCTS=[...]` block with fresh data from v9_products.json, then apply all fixes as string replacements. v7 has correct renderFilters subs and filter logic — v8 had broken them. ### Image Analysis (The 7th Guest VR) - Screenshot from The 7th Guest VR puzzle room — NOT an oil painting - Style: new古典主义 (Neoclassicism), similar to Jacques-Louis David - Reference: 米开朗基罗《创造亚当》pose, 大卫《跨越阿尔卑斯山圣伯纳隘道》heroism ## 2026-04-16 Continued (00:00+) ### ETF Map — Latest Fixes Applied **Deployment URL:** `https://commitment-harder-shop-tuning.trycloudflare.com/etf-map-v8.html` **Files in use:** - `/root/.openclaw/workspace",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "totalScore": 0.0000014033280694419899,
+      "maxScore": 0.0000014033280694419899,
+      "firstRecalledAt": "2026-04-19T23:26:24.202Z",
+      "lastRecalledAt": "2026-04-19T23:26:24.202Z",
+      "queryHashes": [
+        "ed9450a86276"
+      ],
+      "recallDays": [
+        "2026-04-20"
+      ],
+      "conceptTags": [
+        "all-products",
+        "v9-products.json",
+        "jacques-louis",
+        "openclaw/workspace",
+        "use",
+        "html",
+        "template",
+        "has"
+      ]
+    },
+    "memory:memory/2026-04-16.md:19:36": {
+      "key": "memory:memory/2026-04-16.md:19:36",
+      "path": "memory/2026-04-16.md",
+      "startLine": 19,
+      "endLine": 36,
+      "source": "memory",
+      "snippet": "5. **ETF index fabricated** — modal's mmeta showed `暂无数据` fabricated from index field. Removed from mmeta. 6. **NOTE_MAP rebuilt** — v8 had broken NOTE_MAP from corrupted data. Rebuilt from v9_products.json with all 12 notes. 7. **Row note display** — changed from `<span class=\"row-note\">` to `<div class=\"row-note\">` and fixed note extraction to use `note` variable (r[12]). 8. **Index div removed** — removed the `<div style=\"max-width:120px;overflow:hidden...\">` showing fabricated index in 2nd column. 9. **renderTable filters** — replaced broken index-based filters with correct cat-based ones. Added `港股通ETF-60/40产品` filter. **Product data:** - 110 products total: 31 mainland, 79 overseas -",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "totalScore": 0.0000013806548370014975,
+      "maxScore": 0.0000013806548370014975,
+      "firstRecalledAt": "2026-04-19T23:26:24.202Z",
+      "lastRecalledAt": "2026-04-19T23:26:24.202Z",
+      "queryHashes": [
+        "ed9450a86276"
+      ],
+      "recallDays": [
+        "2026-04-20"
+      ],
+      "conceptTags": [
+        "note-map",
+        "v9-products.json",
+        "row-note",
+        "max-width",
+        "index-based",
+        "cat-based",
+        "港股通etf-60/40产品",
+        "etf"
+      ]
+    },
+    "memory:memory/2026-04-16.md:56:85": {
+      "key": "memory:memory/2026-04-16.md:56:85",
+      "path": "memory/2026-04-16.md",
+      "startLine": 56,
+      "endLine": 85,
+      "source": "memory",
+      "snippet": "3. renderFilters subs: 全部 / QDII ETF / QDII 联接基金 / 港股通ETF / 港股通ETF-60/40产品 / 跨境理财通 4. .tag-6040 CSS added 5. note=r[12] extraction 6. 60/40 typeTag logic 7. NOTE_MAP rebuilt (12 entries) 8. Removed fabricated index from td2 and mmeta **分类体系 (verified correct):** - QDII ETF (type='qdii'): 6 products - QDII 联接基金 (type='link'): 7 products - 港股通ETF (type='hgt'): 7 products - 港股通ETF-60/40产品 (type='hgt' + cat contains '60/40'): 3 products (3441.HK, 3442.HK, 3432.HK) - 跨境理财通 (type='wealth'): 8 products **境外可买 tabs (v7 template, unchanged):** 港股ETF / 美股ETF / A股ETF / 债券ETF / 货币ETF / 杠反ETF **User feedback (00:25):** \"还是不对哦，要彻底优化，网页显示也不对\" - Still reported issues after all fixes — needs re-verificati",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "totalScore": 8.378187343081023e-7,
+      "maxScore": 8.378187343081023e-7,
+      "firstRecalledAt": "2026-04-19T23:26:24.202Z",
+      "lastRecalledAt": "2026-04-19T23:26:24.202Z",
+      "queryHashes": [
+        "ed9450a86276"
+      ],
+      "recallDays": [
+        "2026-04-20"
+      ],
+      "conceptTags": [
+        "港股通etf-60/40产品",
+        "tag-6040",
+        "60/40",
+        "note-map",
+        "3441.hk",
+        "3442.hk",
+        "3432.hk",
+        "re-verificati"
+      ]
+    }
+  }
+}

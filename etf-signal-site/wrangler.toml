@@ -1,0 +1,11 @@
+name = "etf-signal-api"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+account_id = "52fca883b81b260936d4b8dcf7157053"
+
+[observability]
+enabled = true
+
+[[kv_namespaces]]
+binding = "ETF_DATA"
+id = "e34fc986e75d4dada57d78aa84eeb150"

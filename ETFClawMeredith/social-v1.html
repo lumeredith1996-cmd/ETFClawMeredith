@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>投资大V观点追踪</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --primary: #1a73e8;
+      --success: #34a853;
+      --danger: #ea4335;
+      --warning: #fbbc04;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text: #202124;
+      --text-secondary: #5f6368;
+      --border: #e8eaed;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    /* 头部 */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .header h1 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+    
+    .header .subtitle {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+    
+    /* 控制栏 */
+    .controls {
+      background: var(--card-bg);
+      padding: 15px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .filter-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    
+    .filter-btn {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: white;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+    
+    .filter-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    
+    .filter-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    
+    .refresh-btn {
+      margin-left: auto;
+      padding: 8px 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .refresh-btn:hover { background: #1557b0; }
+    .refresh-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    
+    /* 统计栏 */
+    .stats {
+      display: flex;
+      gap: 20px;
+      padding: 12px 20px;
+      background: #e8f0fe;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    
+    .stats span { display: flex; align-items: center; gap: 4px; }
+    
+    /* 主内容区 */
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    /* 卡片 */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      transition: box-shadow 0.2s;
+    }
+    
+    .card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    
+    .source-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 16px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .source-xueqiu { background: #ffeced; color: #e53131; }
+    .source-weibo { background: #fff5e6; color: #eb6841; }
+    .source-public { background: #e6f7ee; color: #1aad19; }
+    .source-trump { background: #ffe6e6; color: #c4392f; }
+    
+    .time-ago {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    
+    /* 标签 */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    
+    .tag {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+    
+    .tag-category { background: #e3f2fd; color: #1565c0; }
+    .tag-importance-high { background: #ffebee; color: #c62828; }
+    .tag-importance-mid { background: #fff3e0; color: #ef6c00; }
+    .tag-importance-low { background: #f5f5f5; color: #616161; }
+    .tag-bullish { background: #e8f5e9; color: #2e7d32; }
+    .tag-bearish { background: #ffebee; color: #c62828; }
+    .tag-neutral { background: #f5f5f5; color: #616161; }
+    
+    /* 内容 */
+    .card-content {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    
+    .card-content.collapsed {
+      max-height: 150px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .card-content.collapsed::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: linear-gradient(transparent, var(--card-bg));
+    }
+    
+    .expand-btn {
+      color: var(--primary);
+      cursor: pointer;
+      font-size: 0.8rem;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    
+    /* iframe 懒加载 */
+    .iframe-container {
+      position: relative;
+      background: #f5f5f5;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+    
+    .iframe-placeholder {
+      width: 100%;
+      height: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: background 0.2s;
+    }
+    
+    .iframe-placeholder:hover { background: #eee; }
+    
+    .iframe-placeholder .icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    
+    .iframe-placeholder .text {
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+    
+    .iframe-placeholder .hint {
+      font-size: 0.75rem;
+      color: #999;
+    }
+    
+    .iframe-container.loaded .iframe-placeholder { display: none; }
+    .iframe-container iframe { display: none; width: 100%; height: 600px; border: none; }
+    .iframe-container.loaded iframe { display: block; }
+    
+    /* 加载状态 */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+    
+    .loading .spinner {
+      width: 30px;
+      height: 30px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+    
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* 空状态 */
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+    
+    .empty .icon { font-size: 3rem; margin-bottom: 15px; }
+    
+    /* 错误提示 */
+    .error-msg {
+      background: #ffebee;
+      color: #c62828;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 0.85rem;
+    }
+    
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .header h1 { font-size: 1.2rem; }
+      .controls { padding: 12px; }
+      .card { padding: 14px; }
+      .stats { padding: 10px 12px; font-size: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <h1>📊 投资大V观点追踪</h1>
+  <p class="subtitle">雪球 · 微博 · 公众号 · 特朗普</p>
+</header>
+
+<div class="controls">
+  <div class="filter-group">
+    <span class="filter-label">分类:</span>
+    <button class="filter-btn active" data-filter="category" data-value="all">全部</button>
+    <button class="filter-btn" data-filter="category" data-value="market">市场分析</button>
+    <button class="filter-btn" data-filter="category" data-value="fund">基金选择</button>
+    <button class="filter-btn" data-filter="category" data-value="macro">宏观策略</button>
+    <button class="filter-btn" data-filter="category" data-value="sector">板块解读</button>
+    <button class="filter-btn" data-filter="category" data-value="risk">风险提示</button>
+    <button class="filter-btn" data-filter="category" data-value="edu">理财知识</button>
+  </div>
+  
+  <div class="filter-group">
+    <span class="filter-label">情绪:</span>
+    <button class="filter-btn active" data-filter="sentiment" data-value="all">全部</button>
+    <button class="filter-btn" data-filter="sentiment" data-value="bullish">看多 📈</button>
+    <button class="filter-btn" data-filter="sentiment" data-value="bearish">看空 📉</button>
+    <button class="filter-btn" data-filter="sentiment" data-value="neutral">中性 ➡️</button>
+  </div>
+  
+  <div class="filter-group">
+    <span class="filter-label">重要:</span>
+    <button class="filter-btn active" data-filter="importance" data-value="all">全部</button>
+    <button class="filter-btn" data-filter="importance" data-value="high">🔥 高</button>
+    <button class="filter-btn" data-filter="importance" data-value="mid">⚡ 中</button>
+    <button class="filter-btn" data-filter="importance" data-value="low">💤 低</button>
+  </div>
+  
+  <button class="refresh-btn" onclick="refreshData()">
+    <span>🔄</span> 刷新
+  </button>
+</div>
+
+<div class="stats" id="stats">
+  <span>📌 共 <strong id="total-count">0</strong> 条</span>
+  <span>📈 看多 <strong id="bullish-count">0</strong></span>
+  <span>📉 看空 <strong id="bearish-count">0</strong></span>
+  <span>🔄 <span id="last-update">--</span> 更新</span>
+</div>
+
+<main class="main" id="main-content">
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>正在加载内容...</p>
+  </div>
+</main>
+
+<script>
+// ==================== 数据配置 ====================
+// 在这里添加雪球/微博/公众号等iframe地址
+const SOURCES = [
+  {
+    id: 'xueqiu-1',
+    platform: 'xueqiu',
+    name: '雪球用户1',
+    url: 'https://xueqiu.com/u/你的雪球ID',
+    icon: '❄️'
+  },
+  {
+    id: 'weibo-1', 
+    platform: 'weibo',
+    name: '微博用户1',
+    url: 'https://weibo.com/u/你的微博ID',
+    icon: '📮'
+  }
+];
+
+// 示例：手动添加的带标签的内容（当无法抓取时显示这些）
+const MANUAL_POSTS = [
+  {
+    id: 1,
+    platform: 'xueqiu',
+    source: '水晶苍蝇拍',
+    time: '2小时前',
+    category: 'market',
+    categoryName: '市场分析',
+    importance: 'high',
+    sentiment: 'bullish',
+    content: '当前位置不宜悲观，核心资产调整后性价比提升。耐心持有优质基金，静待估值修复。',
+    url: 'https://xueqiu.com/...'
+  },
+  {
+    id: 2,
+    platform: 'weibo',
+    source: '但斌',
+    time: '3小时前',
+    category: 'macro',
+    categoryName: '宏观策略',
+    importance: 'mid',
+    sentiment: 'neutral',
+    content: '当前宏观环境复杂，需关注美联储政策走向。建议保持中性仓位，等待确定性机会。',
+    url: 'https://weibo.com/...'
+  },
+  {
+    id: 3,
+    platform: 'public',
+    source: '银行螺丝钉',
+    time: '5小时前',
+    category: 'fund',
+    categoryName: '基金选择',
+    importance: 'high',
+    sentiment: 'bullish',
+    content: '红利指数基金当前股息率仍具吸引力，适合定投。低估买入，高估卖出，坚守策略。',
+    url: 'https://xueqiu.com/...'
+  }
+];
+
+// ==================== 状态管理 ====================
+let currentFilters = {
+  category: 'all',
+  sentiment: 'all',
+  importance: 'all'
+};
+
+let allPosts = [];
+
+// ==================== 核心函数 ====================
+function init() {
+  // 尝试从localStorage读取缓存
+  const cached = localStorage.getItem('etfclaw-posts');
+  if (cached) {
+    try {
+      allPosts = JSON.parse(cached);
+      renderPosts();
+    } catch (e) {
+      console.log('缓存解析失败');
+    }
+  }
+  
+  // 加载iframe源
+  loadIframes();
+  
+  // 设置自动刷新
+  setInterval(refreshData, 5 * 60 * 1000);
+  document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+}
+
+function refreshData() {
+  const btn = document.querySelector('.refresh-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span>🔄</span> 刷新中...';
+  
+  // 模拟数据更新（实际应该从API获取）
+  setTimeout(() => {
+    allPosts = [...MANUAL_POSTS];
+    localStorage.setItem('etfclaw-posts', JSON.stringify(allPosts));
+    renderPosts();
+    document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+    btn.disabled = false;
+    btn.innerHTML = '<span>🔄</span> 刷新';
+  }, 1000);
+}
+
+function renderPosts() {
+  const container = document.getElementById('main-content');
+  
+  // 过滤
+  let filtered = allPosts.filter(post => {
+    if (currentFilters.category !== 'all' && post.category !== currentFilters.category) return false;
+    if (currentFilters.sentiment !== 'all' && post.sentiment !== currentFilters.sentiment) return false;
+    if (currentFilters.importance !== 'all' && post.importance !== currentFilters.importance) return false;
+    return true;
+  });
+  
+  // 更新统计
+  updateStats();
+  
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="empty">
+        <div class="icon">🔍</div>
+        <p>暂无符合条件的内容</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = filtered.map(post => `
+    <article class="card" data-id="${post.id}">
+      <div class="card-header">
+        <span class="source-badge source-${post.platform}">
+          ${getPlatformIcon(post.platform)} ${post.source}
+        </span>
+        <span class="time-ago">${post.time}</span>
+      </div>
+      
+      <div class="tags">
+        <span class="tag tag-category">📂 ${post.categoryName}</span>
+        <span class="tag tag-importance-${post.importance}">${getImportanceEmoji(post.importance)} ${getImportanceText(post.importance)}</span>
+        <span class="tag tag-${post.sentiment}">${getSentimentEmoji(post.sentiment)} ${getSentimentText(post.sentiment)}</span>
+      </div>
+      
+      <div class="card-content collapsed" id="content-${post.id}">
+        ${escapeHtml(post.content)}
+      </div>
+      <button class="expand-btn" onclick="toggleExpand(${post.id})">展开阅读 ▼</button>
+      
+      ${post.url ? `<div class="iframe-container" id="iframe-${post.id}">
+        <div class="iframe-placeholder" onclick="loadIframe(${post.id}, '${post.url}')">
+          <div class="icon">📜</div>
+          <div class="text">点击加载完整内容</div>
+          <div class="hint">懒加载模式，点击后加载 iframe</div>
+        </div>
+        <iframe src="" loading="lazy"></iframe>
+      </div>` : ''}
+    </article>
+  `).join('');
+}
+
+function toggleExpand(id) {
+  const content = document.getElementById(`content-${id}`);
+  const btn = content.nextElementSibling;
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    btn.textContent = '收起 ▲';
+  } else {
+    content.classList.add('collapsed');
+    btn.textContent = '展开阅读 ▼';
+  }
+}
+
+function loadIframe(id, url) {
+  const container = document.getElementById(`iframe-${id}`);
+  if (container) {
+    container.querySelector('iframe').src = url;
+    container.classList.add('loaded');
+  }
+}
+
+function loadIframes() {
+  // 预加载可见的iframe（懒加载）
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id.replace('iframe-', '');
+        const post = allPosts.find(p => p.id == id);
+        if (post && post.url) {
+          loadIframe(id, post.url);
+          observer.unobserve(entry.target);
+        }
+      }
+    });
+  }, { rootMargin: '200px' });
+  
+  document.querySelectorAll('.iframe-container').forEach(el => {
+    observer.observe(el);
+  });
+}
+
+function updateStats() {
+  document.getElementById('total-count').textContent = allPosts.length;
+  document.getElementById('bullish-count').textContent = allPosts.filter(p => p.sentiment === 'bullish').length;
+  document.getElementById('bearish-count').textContent = allPosts.filter(p => p.sentiment === 'bearish').length;
+}
+
+// ==================== 辅助函数 ====================
+function getPlatformIcon(platform) {
+  const icons = { xueqiu: '❄️', weibo: '📮', public: '📰', trump: '🇺🇸' };
+  return icons[platform] || '📎';
+}
+
+function getImportanceEmoji(imp) {
+  return { high: '🔥', mid: '⚡', low: '💤' }[imp] || '📌';
+}
+
+function getImportanceText(imp) {
+  return { high: '重要', mid: '一般', low: '参考' }[imp] || imp;
+}
+
+function getSentimentEmoji(sent) {
+  return { bullish: '📈', bearish: '📉', neutral: '➡️' }[sent] || '📌';
+}
+
+function getSentimentText(sent) {
+  return { bullish: '看多', bearish: '看空', neutral: '中性' }[sent] || sent;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ==================== 筛选器绑定 ====================
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const filter = btn.dataset.filter;
+    const value = btn.dataset.value;
+    
+    // 更新按钮状态
+    document.querySelectorAll(`.filter-btn[data-filter="${filter}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // 更新筛选
+    currentFilters[filter] = value;
+    renderPosts();
+  });
+});
+
+// 初始化
+init();
+</script>
+
+</body>
+</html>

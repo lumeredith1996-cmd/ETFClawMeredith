@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>港股杠反ETF择时信号 | CCASS情绪观测</title>
+<style>
+:root{--bg:#f4f7fb;--panel:#fff;--text:#0f172a;--muted:#64748b;--line:#e2e8f0;--blue:#2563eb;--green:#059669;--red:#dc2626;--shadow:0 14px 40px rgba(15,23,42,.06)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:linear-gradient(180deg,#f6f8fc 0%,#eef3fb 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;min-height:100vh}
+.wrap{max-width:1120px;margin:0 auto;padding:32px 20px 64px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:42px;height:42px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.logo-text{font-size:20px;font-weight:800}
+.logo-sub{font-size:12px;color:var(--muted)}
+.live-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#ecfdf5;color:#047857;font-size:12px;font-weight:600;border:1px solid #a7f3d0}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#047857;animation:pl 2s infinite}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.3}}
+.hero{background:var(--panel);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);padding:32px;margin-bottom:18px}
+.eyebrow{display:inline-block;padding:7px 12px;border-radius:999px;background:#eef4ff;color:#1d4ed8;font-size:12px;font-weight:700;border:1px solid #cfe0ff;margin-bottom:12px}
+.hero h1{font-size:36px;font-weight:800;line-height:1.15;margin-bottom:10px}
+.hero p{font-size:15px;line-height:1.8;color:#475569;max-width:800px}
+.update-time{font-size:12px;color:#94a3b8;margin-top:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:22px;margin-bottom:18px}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.section-title{font-size:18px;font-weight:800}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid}
+.badge.green{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.badge.red{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.badge.blue{background:#eff6ff;color:#1d4ed8;border-color:#cfe0ff}
+.index-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.index-card{border:1px solid var(--line);border-radius:18px;padding:20px;transition:.15s}
+.index-card:hover{border-color:#bfd3ff}
+.index-name{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+.signal{font-size:34px;font-weight:800;margin-bottom:6px}
+.signal.buy{color:#047857}.signal.sell{color:#b91c1c}.signal.watch{color:#64748b}
+.reason{font-size:13px;color:#475569;margin-bottom:10px}
+.delta{font-size:12px;color:#94a3b8}
+.delta span{font-weight:700}
+.etf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.etf-card{border:1px solid var(--line);border-radius:16px;padding:16px}
+.etf-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.etf-name{font-size:13px;font-weight:700;line-height:1.4}
+.etf-code{font-size:11px;color:#94a3b8;font-family:monospace}
+.etf-badge{font-size:10px;padding:3px 8px;border-radius:6px;font-weight:700}
+.etf-badge.l{background:#fef2f2;color:#b91c1c}
+.etf-badge.s{background:#ecfdf5;color:#047857}
+.etf-badge.n{background:#f8fafc;color:#475569}
+.etf-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.etf-stat{text-align:center;padding:8px;border-radius:10px;background:#f8fafc}
+.etf-stat-k{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px}
+.etf-stat-v{font-size:15px;font-weight:800}
+.etf-stat-v.h{color:#047857}.etf-stat-v.l{color:#b91c1c}
+.logic-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.logic-card{border:1px solid var(--line);border-radius:16px;padding:18px;background:#f8fafc}
+.logic-title{font-size:14px;font-weight:700;margin-bottom:12px}
+.logic-row{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+.logic-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.logic-icon.b{background:#ecfdf5}.logic-icon.s{background:#fef2f2}.logic-icon.w{background:#eff6ff}
+.logic-text{font-size:12px;color:#475569;line-height:1.7}
+@media(max-width:768px){.wrap{padding:20px 16px}.hero h1{font-size:26px}.index-grid,.etf-grid,.logic-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">📊</div>
+      <div><div class="logo-text">港股杠反ETF择时</div><div class="logo-sub">基于CCASS散户情绪的择时策略</div></div>
+    </div>
+    <div class="live-badge"><span class="live-dot"></span><span id="status">加载中</span></div>
+  </div>
+
+  <div class="hero">
+    <div class="eyebrow">📌 基于港股杠反ETF份额变化的择时策略</div>
+    <h1>港股择时信号 · 富途情绪观测</h1>
+    <p>监控南方东英旗下6只杠反ETF的富途证券持仓变化率。当散户多头离场时暗示底部区域，触发买入信号；当散户多头进场时暗示顶部区域，触发卖出信号。</p>
+    <p class="update-time">数据来源：港交所CCASS · 策略来源：开源证券金工研报 · 更新：<span id="update-t">-</span></p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div class="section-title">指数择时信号</div>
+      <span class="badge blue">N=20 λ₁=1.2% λ₂=1.0%</span>
+    </div>
+    <div class="index-grid">
+      <div class="index-card">
+        <div class="index-name">恒生科技指数</div>
+        <div id="hst-sig" class="signal watch">-</div>
+        <div id="hst-reason" class="reason"></div>
+        <div id="hst-delta" class="delta"></div>
+      </div>
+      <div class="index-card">
+        <div class="index-name">恒生指数</div>
+        <div id="hsi-sig" class="signal watch">-</div>
+        <div id="hsi-reason" class="reason"></div>
+        <div id="hsi-delta" class="delta"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div class="section-title">6只杠反ETF富途持仓</div>
+      <span class="badge green">富途占比参考 13%~17%</span>
+    </div>
+    <div class="etf-grid" id="etf-grid"><div style="text-align:center;padding:40px;color:#94a3b8">加载中...</div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><div class="section-title">策略逻辑</div></div>
+    <div class="logic-grid">
+      <div class="logic-card">
+        <div class="logic-title">📈 信号规则</div>
+        <div class="logic-row">
+          <div class="logic-icon b">📉</div>
+          <div class="logic-text"><b>买入信号</b>：做多ETF富途份额下降&gt;1.2% 或 做空ETF份额上升&gt;1.2%<br>→ 散户多头离场/空头进场 → 市场底部</div>
+        </div>
+        <div class="logic-row">
+          <div class="logic-icon s">📈</div>
+          <div class="logic-text"><b>卖出信号</b>：做多ETF富途份额上升&gt;1.0% 或 做空ETF份额下降&gt;1.0%<br>→ 散户多头进场/空头离场 → 市场顶部</div>
+        </div>
+      </div>
+      <div class="logic-card">
+        <div class="logic-title">🔬 核心逻辑</div>
+        <div class="logic-row">
+          <div class="logic-icon w">🔍</div>
+          <div class="logic-text">富途证券是典型<strong>散户经纪商</strong>，杠反ETF中平均占比<strong>15.4%</strong>（最高31.3%），与指数呈显著<strong>负相关</strong>（恒生科技-0.67，恒指-0.92），具有明确反向指示意义。</div>
+        </div>
+        <div class="logic-row">
+          <div class="logic-icon w">⚡</div>
+          <div class="logic-text">数据日度更新，领先财报与宏观数据。<strong>恒生科技策略年化超额22.27%</strong>（回测2021-2025），恒指策略年化超额10.41%。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Hardcoded API URL - Worker endpoint
+const API = 'https://etf-signal-luclaw.lumeredith1996.workers.dev';
+
+function cls(s) { return s === '买入' ? 'buy' : s === '卖出' ? 'sell' : 'watch'; }
+function fmt(n) { return n == null ? '-' : (n >= 0 ? '+' : '') + n.toFixed(2) + '%'; }
+function w(n) { return (n/10000).toFixed(0) + '万'; }
+
+async function load() {
+  try {
+    const r = await fetch(API + '/api/signals');
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    render(d);
+  } catch(e) {
+    document.getElementById('etf-grid').innerHTML = '<div style="text-align:center;padding:40px;color:#b91c1c">数据加载失败: ' + e.message + '</div>';
+    document.getElementById('status').textContent = '数据异常';
+  }
+}
+
+function render(d) {
+  document.getElementById('status').textContent = '实时';
+  const t = new Date(d.updateTime);
+  document.getElementById('update-t').textContent = t.toLocaleString('zh-CN', {timeZone:'Asia/Shanghai'});
+
+  const sigs = d.indexSignals || {};
+  for (const [idx, info] of Object.entries(sigs)) {
+    const el = idx === '恒生科技' ? 'hst' : 'hsi';
+    const s = document.getElementById(el + '-sig');
+    s.textContent = info.signal || '观望';
+    s.className = 'signal ' + cls(info.signal);
+    document.getElementById(el + '-reason').textContent = info.reason || '';
+    document.getElementById(el + '-delta').innerHTML = info.deltaL != null
+      ? '做多变化: <span>' + fmt(info.deltaL) + '</span> · 做空变化: <span>' + fmt(info.deltaS) + '</span>'
+      : '';
+  }
+
+  const grid = document.getElementById('etf-grid');
+  grid.innerHTML = '';
+  const order = ['07226','07552','03033','07200','07500','03037'];
+  for (const code of order) {
+    const e = d.etfs && d.etfs[code];
+    if (!e || e.error) continue;
+    const bc = e.type === '2x_long' ? 'l' : e.type === '2x_short' ? 's' : 'n';
+    const bt = e.type === '2x_long' ? '2x多' : e.type === '2x_short' ? '2x空' : '普通';
+    const pct = parseFloat(e.futuPercent || 0);
+    const pc = pct > 10 ? 'h' : pct < 5 ? 'l' : '';
+    grid.innerHTML +=
+      '<div class="etf-card">' +
+        '<div class="etf-top">' +
+          '<div><div class="etf-code">' + code + '</div><div class="etf-name">' + e.name + '</div></div>' +
+          '<span class="etf-badge ' + bc + '">' + bt + '</span>' +
+        '</div>' +
+        '<div class="etf-stats">' +
+          '<div class="etf-stat"><div class="etf-stat-k">富途持仓</div><div class="etf-stat-v">' + w(e.futuTotal) + '</div></div>' +
+          '<div class="etf-stat"><div class="etf-stat-k">总持仓</div><div class="etf-stat-v">' + w(e.totalShares) + '</div></div>' +
+          '<div class="etf-stat"><div class="etf-stat-k">富途占比</div><div class="etf-stat-v ' + pc + '">' + pct.toFixed(1) + '%</div></div>' +
+        '</div>' +
+      '</div>';
+  }
+}
+
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全球ETF投资地图</title>
+<style>
+:root{--bg:#f5f6fa;--card:#ffffff;--card2:#f0f2f8;--border:#e2e5ef;--text:#1a1d2e;--text2:#6b7280;--dim:#9ca3af;--green:#16a34a;--red:#dc2626;--orange:#ea580c;--blue:#2563eb;--gold:#d97706;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:#fff;border-bottom:2px solid var(--border);padding:0 32px;display:flex;justify-content:space-between;align-items:center;height:58px;position:sticky;top:0;z-index:100}
+.logo{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+.logo .beta{background:var(--orange);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px}
+.hdr-right{display:flex;align-items:center;gap:14px}
+.upd{font-size:12px;color:var(--dim)}
+.lt{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pl 2s infinite}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.3}}
+.live{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:5px}
+.tabs{background:#fff;padding:0 32px;display:flex;border-bottom:1px solid var(--border)}
+.ta{padding:12px 22px;font-size:14px;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:600;transition:.15s}
+.ta:hover{color:var(--orange)}
+.ta.ac{color:var(--orange);border-bottom-color:var(--orange)}
+.mn{padding:20px 32px;max-width:1200px;margin:0 auto}
+.pn{display:none}.pn.ac{display:block}
+.sec-title{font-size:14px;font-weight:800;color:var(--text);margin-bottom:12px;padding-left:10px;border-left:4px solid var(--orange);display:flex;align-items:center;justify-content:space-between}
+.sec-title .sub{font-size:12px;color:var(--dim);font-weight:400}
+.info-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:11px 14px;font-size:12px;color:#92400e;margin-bottom:16px;line-height:1.65}
+.tbl{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04);margin-bottom:18px}
+.tbl table{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th{background:#fafbfc;padding:9px 11px;text-align:left;font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;font-weight:700;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+.tbl th:hover{color:var(--orange)}
+.th-sort::after{content:" \2195";font-size:9px;opacity:.3;margin-left:3px}
+.th-sort.asc::after{content:" \2191";opacity:1;color:var(--orange)}
+.th-sort.desc::after{content:" \2193";opacity:1;color:var(--orange)}
+.tbl td{padding:9px 11px;border-bottom:1px solid #f5f5f5;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#fafafa}
+.tbl .nm{text-align:right;font-variant-numeric:tabular-nums}
+/* Price colors */
+.up{color:var(--green);font-weight:700}
+.down{color:var(--red);font-weight:700}
+.neutral{color:var(--text2)}
+/* Tags */
+.tag-o{background:#fff7ed;color:#ea580c;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700}
+.tag-b{background:#dbeafe;color:#1d4ed8;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700}
+.tag-d{background:#f3f4f6;color:#6b7280;font-size:10px;padding:2px 7px;border-radius:20px}
+.tag-g{background:#dcfce7;color:#16a34a;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700}
+.tag-r{background:#fee2e2;color:#dc2626;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700}
+.chip{display:inline-flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chip span{font-size:10px;color:var(--dim);background:#f3f4f6;padding:2px 7px;border-radius:20px}
+/* Channel section */
+.chan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:20px}
+.chan-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.03)}
+.chan-card .ci{font-size:18px;margin-bottom:6px}
+.chan-card .cn{font-weight:800;font-size:13px;margin-bottom:2px}
+.chan-card .cs{font-size:10.5px;color:var(--dim);margin-bottom:8px}
+.chan-items{display:flex;flex-direction:column;gap:4px}
+.chan-item{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:12px}
+.chan-item:last-child{border-bottom:none}
+.chan-item .name{font-weight:600;color:var(--text)}
+.chan-item .cd{color:var(--dim);font-size:10.5px}
+/* Flow badges */
+.f-ok{background:#dcfce7;color:#16a34a;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700}
+.f-warn{background:#ffedd5;color:#ea580c;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700}
+.f-limit{background:#fee2e2;color:#dc2626;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700}
+.stars{color:var(--gold);letter-spacing:1px}
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.modal.open{display:flex}
+.mbox{background:#fff;border-radius:14px;width:100%;max-width:920px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.18)}
+.mhead{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;border-radius:14px 14px 0 0;z-index:2}
+.mtitle{font-size:14px;font-weight:800}
+.mclose{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:#fff;color:var(--dim);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+.mbody{padding:16px 20px}
+.mprice-row{display:flex;align-items:flex-end;gap:16px;margin-bottom:12px;flex-wrap:wrap}
+.mprice-block{text-align:right}
+.mnav{font-size:28px;font-weight:900}
+.mchg{font-size:14px;font-weight:700;margin-top:3px}
+.mmeta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.mmeta span{font-size:11px;color:var(--dim);background:var(--card2);padding:3px 9px;border-radius:20px}
+.chart-wrap{margin:12px 0;background:var(--card2);border-radius:10px;padding:12px}
+.chart-title{font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:600}
+canvas#kchart{max-width:100%;height:150px;background:#fff;border-radius:8px;border:1px solid var(--border)}
+.chart-legend{display:flex;gap:14px;margin-top:6px;font-size:10.5px;color:var(--dim)}
+.chart-legend span{display:flex;align-items:center;gap:3px}
+.cline{width:12px;height:2px;display:inline-block}
+.cline-p{background:#2563eb}.cline-v{background:#ea580c}
+.hsec{margin-top:16px}
+.hsec h4{font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;padding-bottom:7px;border-bottom:1px solid var(--border);margin-bottom:9px;font-weight:600}
+.mtbl{width:100%;border-collapse:collapse;font-size:12px;overflow-x:auto;display:block}
+.mtbl table{min-width:500px;width:100%}
+.mtbl th{background:#fafbfc;padding:7px 9px;text-align:left;font-size:10px;color:var(--dim);text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+.mtbl td{padding:7px 9px;border-bottom:1px solid #f8f8f8;vertical-align:middle;white-space:nowrap}
+.mtbl tr:last-child td{border-bottom:none}
+.mtbl tr:hover td{background:#fafafa}
+.rank{font-weight:800;color:var(--dim);width:24px;font-size:11px}
+/* Research */
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.rcard{background:#fff;border:1px solid var(--border);border-radius:12px;padding:15px;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.03)}
+.rcard:hover{border-color:var(--orange);transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.07)}
+.rtop{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.rtag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px}
+.rtag-g{background:#dcfce7;color:#16a34a}.rtag-r{background:#fee2e2;color:#dc2626}.rtag-b{background:#dbeafe;color:#1d4ed8}.rtag-o{background:#ffedd5;color:#ea580c}
+.rdate{font-size:10.5px;color:var(--dim)}
+.rtitle{font-size:13.5px;font-weight:700;line-height:1.45;margin-bottom:7px}
+.rsummary{font-size:11.5px;color:var(--text2);line-height:1.65}
+.rfooter{margin-top:10px;padding-top:9px;border-top:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.rsrc{font-size:10.5px;color:var(--dim)}
+.rtags{display:flex;gap:4px;flex-wrap:wrap}
+.rtags span{font-size:10px;background:#f3f4f6;color:var(--dim);padding:2px 6px;border-radius:10px}
+/* Flow */
+.flow-tabs{display:flex;gap:7px;margin-bottom:12px}
+.ftab{padding:5px 13px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);color:var(--dim);background:#fff;transition:.15s}
+.ftab.ac{background:var(--orange);color:#fff;border-color:var(--orange)}
+.fsection{display:none}.fsection.ac{display:block}
+.ftbl{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.03)}
+.ftbl table{width:100%;border-collapse:collapse;font-size:12.5px}
+.ftbl th{background:#fafbfc;padding:9px 12px;text-align:left;font-size:10.5px;color:var(--dim);text-transform:uppercase;border-bottom:1px solid var(--border)}
+.ftbl td{padding:9px 12px;border-bottom:1px solid #f5f5f5}
+.ftbl tr:last-child td{border-bottom:none}
+.rnum{font-weight:900;color:var(--dim);width:30px;font-size:14px}
+.fname{font-weight:600}.fcode{font-size:10.5px;color:var(--dim);margin-top:1px}
+.famt{font-weight:800;font-size:13px;text-align:right;white-space:nowrap}
+@media(max-width:768px){.header,.tabs{padding:0 14px}.mn{padding:14px}.tbl{overflow-x:auto}.tbl table{min-width:800px}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">&#x1F30F; 全球ETF投资地图 <span class="beta">BETA</span></div>
+  <div class="hdr-right">
+    <span class="upd" id="upt"></span>
+    <div class="live"><span class="lt"></span>实时行情</div>
+  </div>
+</div>
+<div class="tabs">
+  <div class="ta ac" id="tab0" onclick="sw(0)">&#x1F4CA; ETF列表</div>
+  <div class="ta" id="tab1" onclick="sw(1)">&#x1F4DC; 海外机构观点</div>
+  <div class="ta" id="tab2" onclick="sw(2)">&#x1F4B0; 海外聪明钱</div>
+</div>
+<div class="mn">
+  <div class="pn ac" id="pn0">
+    <!-- Channel cards + ETF table merged -->
+    <div class="sec-title">跨境投资渠道 &amp; 可买产品</div>
+    <div class="chan-grid" id="changrid"></div>
+    <div class="sec-title" style="margin-top:4px">全部产品实时行情 <span class="sub">点击表头排序 &middot; 点击行查看持仓</span></div>
+    <div class="tbl">
+      <table id="etftbl">
+        <thead>
+          <tr>
+            <th class="th-sort" data-sort="name">产品 <span class="sort-icon"></span></th>
+            <th class="th-sort desc" data-sort="chg">涨跌幅 <span class="sort-icon"></span></th>
+            <th class="th-sort" data-sort="last">最新价 <span class="sort-icon"></span></th>
+            <th class="th-sort" data-sort="turnover">今日成交额 <span class="sort-icon"></span></th>
+            <th class="th-sort" data-sort="premium">折溢价 <span class="sort-icon"></span></th>
+            <th class="th-sort" data-sort="flow1d">昨日净流入 <span class="sort-icon"></span></th>
+            <th class="th-sort" data-sort="flow1m">近1月净流入 <span class="sort-icon"></span></th>
+            <th>跟踪指数</th>
+          </tr>
+        </thead>
+        <tbody id="etftbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="pn" id="pn1">
+    <div class="sec-title">海外机构最新观点 <span class="sub">宏观策略 &middot; 行业配置 &middot; 产品分析</span></div>
+    <div class="rgrid" id="rgrid"></div>
+  </div>
+  <div class="pn" id="pn2">
+    <div class="sec-title">香港ETF资金流 <span class="sub">来源: CSOP</span></div>
+    <div class="flow-tabs">
+      <div class="ftab ac" id="ftabin" onclick="sf('in')">&#x2B06; 资金流入</div>
+      <div class="ftab" id="ftabout" onclick="sf('out')">&#x2B07; 资金流出</div>
+    </div>
+    <div id="finsec" class="fsection ac">
+      <div class="ftbl"><table><thead><tr><th style="width:38px">#</th><th>基金</th><th style="text-align:right">净流入（USD）</th></tr></thead><tbody id="flowintable"></tbody></table></div>
+    </div>
+    <div id="foutsec" class="fsection">
+      <div class="ftbl"><table><thead><tr><th style="width:38px">#</th><th>基金</th><th style="text-align:right">净流出（USD）</th></tr></thead><tbody id="flowouttable"></tbody></table></div>
+    </div>
+  </div>
+</div>
+<div class="modal" id="modal" onclick="if(event.target===this)cm()">
+  <div class="mbox">
+    <div class="mhead">
+      <div class="mtitle" id="mtitle"></div>
+      <button class="mclose" onclick="cm()">&#x2715;</button>
+    </div>
+    <div class="mbody" id="mbody"></div>
+  </div>
+</div>
+<script>
+// Real-time quote data (2026-04-15 14:33 close to real-time)
+const QT = {
+  '513130.SH':{name:'恒生科技',last:0.617,prev:0.610,chg:1.15,up:true,vol:65111537,turnover:4042148266,turnoverStr:'40.4亿',type:'qdii',nav:0.615,premium:0.33,flow1d:'+2.3亿',flow1m:'+18.5亿',index:'恒生科技指数',region:'香港',desc:'聚焦香港上市规模最大的30家科技龙头'},
+  '159687.SZ':{name:'亚太精选',last:1.685,prev:1.669,chg:0.96,up:true,vol:513939,turnover:87033410,turnoverStr:'8.70亿',type:'qdii',nav:1.680,premium:0.30,flow1d:'-0.3亿',flow1m:'-1.2亿',index:'富时亚太低碳精选指数',region:'亚太',desc:'覆盖亚太发达及新兴市场，低碳主题筛选'},
+  '513730.SH':{name:'东南亚科技',last:1.251,prev:1.248,chg:0.24,up:true,vol:271178,turnover:34125797,turnoverStr:'3.41亿',type:'qdii',nav:1.250,premium:0.08,flow1d:'+0.8亿',flow1m:'+3.5亿',index:'新交所泛东南亚科技指数',region:'东南亚',desc:'聚焦东南亚科技产业，受益于数字化转型红利'},
+  '159329.SZ':{name:'沙特',last:0.958,prev:0.959,chg:-0.10,up:false,vol:272792,turnover:26150189,turnoverStr:'2.62亿',type:'qdii',nav:0.958,premium:0.00,flow1d:'+0.5亿',flow1m:'+2.1亿',index:'富时沙特阿拉伯指数',region:'沙特',desc:'布局沙特阿拉伯，能源+金融双轮驱动'},
+  '520830.SH':{name:'沙特',last:0.946,prev:0.947,chg:-0.11,up:false,vol:442893,turnover:41941843,turnoverStr:'4.19亿',type:'qdii',nav:0.947,premium:-0.11,flow1d:'-0.2亿',flow1m:'+1.8亿',index:'富时沙特阿拉伯指数',region:'沙特',desc:'布局沙特阿拉伯，能源+金融双轮驱动'},
+  '159822.SZ':{name:'新经济',last:0.659,prev:0.652,chg:1.07,up:true,vol:251300,turnover:16615569,turnoverStr:'1.66亿',type:'qdii',nav:0.658,premium:0.15,flow1d:'+0.1亿',flow1m:'+0.4亿',index:'新经济主题指数',region:'中国',desc:'捕捉中国新经济转型机遇，消费+科技+医疗为主'},
+  '2830.HK':{name:'沙特阿拉伯',last:83.700,prev:83.440,chg:0.31,up:true,vol:930,turnover:77838,turnoverStr:'7.8万',type:'hks',nav:83.5,premium:0.24,flow1d:'+1.2亿',flow1m:'+5.8亿',index:'富时沙特阿拉伯指数',region:'沙特',desc:'布局沙特阿拉伯，能源+金融双轮驱动'},
+  '3442.HK':{name:'恒生港美科技',last:8.170,prev:8.060,chg:1.36,up:true,vol:309900,turnover:2542265,turnoverStr:'254万',type:'hks',nav:8.15,premium:0.25,flow1d:'+3.5亿',flow1m:'+18.2亿',index:'恒生港美科技指数',region:'香港+美国',desc:'同时覆盖香港与美国科技龙头'},
+  '3441.HK':{name:'富时东西精选',last:11.630,prev:11.620,chg:0.09,up:true,vol:630100,turnover:7357213,turnoverStr:'736万',type:'hks',nav:11.62,premium:0.09,flow1d:'+1.8亿',flow1m:'+9.5亿',index:'富时东西股票精选指数',region:'香港+美国',desc:'同时布局香港蓝筹与美国科技龙头'},
+};
+const HOLD = {
+  '513130.SH':[
+    ['腾讯控股','0700.HK','香港',9.50],['阿里巴巴','9988.HK','香港',8.20],['美团','3690.HK','香港',7.80],['小米集团','1810.HK','香港',6.50],['京东集团','9618.HK','香港',5.20],['网易','9999.HK','香港',4.10],['百度集团','9888.HK','香港',3.20],['联想集团','0992.HK','香港',2.80],['快手','1024.HK','香港',2.50],['商汤','0020.HK','香港',1.90],
+  ],
+  '159687.SZ':[
+    ['台积电','2330.TW','台湾',11.49],['三星电子','005930.KS','韩国',5.40],['腾讯控股','0700.HK','香港',3.60],['阿里巴巴','9988.HK','香港',2.60],['丰田汽车','7203.T','日本',2.18],['爱思开海力士','000660.KS','韩国',2.13],['澳洲联邦银行','CBA.AX','澳大利亚',2.03],['三菱UFJ金融','8306.T','日本',1.82],['东京威力科创','8035.T','日本',1.54],['爱德万测试','6857.T','日本',1.45],
+  ],
+  '513730.SH':[
+    ['台达电子(泰国)','DELTA.BK','泰国',14.65],['阿斯特拉国际','ASII.JK','印尼',9.61],['威普罗','WIT','印度',9.53],['印福思','INFY','印度',9.28],['Grab控股','GRAB','新加坡',9.16],['Sea Limited','SE','新加坡',8.27],['Venture Corp','V03.SI','新加坡',5.95],['GoTo Gojek','GOTO.JK','印尼',5.39],['森那美公司','4197.KL','马来西亚',5.30],['奕丰集团','AIY.SI','新加坡',2.84],
+  ],
+  '159329.SZ':[
+    ['拉吉希银行','1120.SR','沙特',15.63],['沙特阿美','2222.SR','沙特',12.16],['沙特国家银行','1180.SR','沙特',9.49],['沙特采矿公司','1211.SR','沙特',7.18],['沙特电信','7010.SR','沙特',6.04],['沙特基础工业','2010.SR','沙特',3.99],['利雅德银行','1010.SR','沙特',3.21],['ACWA电力','2082.SR','沙特',2.81],['沙特Awwal银行','1060.SR','沙特',2.74],['沙特基础工业农营','2020.SR','沙特',2.71],
+  ],
+  '520830.SH':[
+    ['拉吉希银行','1120.SR','沙特',15.63],['沙特阿美','2222.SR','沙特',12.16],['沙特国家银行','1180.SR','沙特',9.49],['沙特采矿公司','1211.SR','沙特',7.18],['沙特电信','7010.SR','沙特',6.04],['沙特基础工业','2010.SR','沙特',3.99],['利雅德银行','1010.SR','沙特',3.21],['ACWA电力','2082.SR','沙特',2.81],['沙特Awwal银行','1060.SR','沙特',2.74],['沙特基础工业农营','2020.SR','沙特',2.71],
+  ],
+  '159822.SZ':[
+    ['阿里巴巴','9988.HK','中国',9.20],['腾讯控股','0700.HK','中国',8.50],['美团','3690.HK','中国',7.10],['京东集团','9618.HK','中国',5.80],['小米集团','1810.HK','中国',5.20],['网易','9999.HK','中国',4.50],['比亚迪','002594.SZ','中国',3.80],['宁德时代','300750.SZ','中国',3.20],['恒瑞医药','600276.SH','中国',2.80],['迈瑞医疗','300760.SZ','中国',2.50],
+  ],
+  '2830.HK':[
+    ['拉吉希银行','1120.SR','沙特',15.63],['沙特阿美','2222.SR','沙特',12.16],['沙特国家银行','1180.SR','沙特',9.49],['沙特采矿公司','1211.SR','沙特',7.18],['沙特电信','7010.SR','沙特',6.04],['沙特基础工业','2010.SR','沙特',3.99],['利雅德银行','1010.SR','沙特',3.21],['ACWA电力','2082.SR','沙特',2.81],['沙特Awwal银行','1060.SR','沙特',2.74],['沙特基础工业农营','2020.SR','沙特',2.71],
+  ],
+  '3442.HK':[
+    ['美团-W','3690.HK','中国',7.56],['比亚迪','1211.HK','中国',7.13],['腾讯控股','0700.HK','中国',6.46],['小米集团','1810.HK','中国',6.39],['阿里巴巴','9988.HK','中国',6.08],['中芯国际','0981.HK','中国',5.79],['亚马逊','AMZN','美国',5.76],['英伟达','NVDA','美国',5.28],['Alphabet','GOOGL','美国',5.27],['苹果','AAPL','美国',4.98],
+  ],
+  '3441.HK':[
+    ['汇丰控股','0005.HK','英国',5.68],['中银香港','2388.HK','香港',5.44],['中电控股','0002.HK','香港',5.06],['电能实业','0006.HK','香港',4.91],['长实集团','1113.HK','香港',4.77],['万洲国际','0288.HK','香港',4.69],['香港中华煤气','0003.HK','香港',4.39],['联想集团','0992.HK','香港',4.33],['港铁公司','0066.HK','香港',2.93],
+  ],
+};
+const IDATA = {
+  '513130.SH':[["09:30",0.621,0.610],["09:35",0.623,0.613],["09:40",0.618,0.611],["09:45",0.613,0.608],["09:50",0.608,0.604],["09:55",0.613,0.600],["10:00",0.618,0.597],["10:05",0.623,0.594],["10:10",0.628,0.592],["10:15",0.629,0.589],["10:20",0.624,0.586],["10:25",0.619,0.584],["10:30",0.614,0.581],["10:35",0.609,0.579],["10:40",0.604,0.576],["10:45",0.599,0.574],["10:50",0.594,0.571],["10:55",0.589,0.569],["11:00",0.584,0.566],["11:05",0.579,0.564],["11:10",0.574,0.561],["11:15",0.569,0.559],["11:20",0.564,0.556],["11:25",0.559,0.554],["11:30",0.554,0.551],["13:01",0.613,0.610],["13:05",0.609,0.610],["13:10",0.604,0.610],["13:15",0.609,0.610],["13:20",0.614,0.610],["13:25",0.615,0.610],["13:30",0.610,0.610],["13:35",0.615,0.610],["13:40",0.614,0.610],["13:45",0.613,0.610],["13:50",0.616,0.610],["13:55",0.611,0.610],["14:00",0.616,0.610],["14:05",0.617,0.610],["14:10",0.616,0.610],["14:15",0.615,0.610],["14:20",0.614,0.610],["14:25",0.615,0.610],["14:30",0.616,0.610],["14:33",0.617,0.610]],
+};
+const REPORTS = [
+  {title:'恒生科技ETF：回调提供中长线布局窗口',date:'2026-04-14',market:'香港',sentiment:'看多',tag1:'香港',tag2:'科技',summary:'恒生科技指数近期随大市回调，腾讯、阿里等权重股估值回落至历史中位数附近。平台经济监管边际改善、AI商业化加速，恒生科技具备配置价值。建议逢低布局。'},
+  {title:'亚太精选ETF：区域分散化优选，低碳主题长线看好',date:'2026-04-12',market:'亚太',sentiment:'看多',tag1:'亚太',tag2:'低碳',summary:'全球ETF资金持续流入亚太新兴市场。覆盖台湾晶片、韩国半导体、日本金融，区域分散化效果显著。低碳筛选排除高碳排放企业，符合ESG趋势。'},
+  {title:'东南亚科技ETF：数字化红利释放，增速领跑新兴市场',date:'2026-04-11',market:'东南亚',sentiment:'看多',tag1:'东南亚',tag2:'科技',summary:'东南亚数字经济规模预计2030年达6000亿美元，Grab、Sea、GoTo等平台渗透率仍低。印度IT外包景气度高，塔塔、印福思受益于AI需求爆发。'},
+  {title:'沙特阿拉伯ETF：能源+金融双核驱动，受益于沙国转型',date:'2026-04-10',market:'中东',sentiment:'中性',tag1:'沙特',tag2:'能源',summary:'OPEC+减产支撑油价区间运行，沙特阿美股息收益率逾5%。Vision 2030推动经济多元化，旅游业与金融业快速发展。沙特估值相对周边更具吸引力。'},
+  {title:'港美科技配置：中美科技龙头一站式覆盖',date:'2026-04-14',market:'全球',sentiment:'看多',tag1:'香港',tag2:'美国',tag3:'科技',summary:'香港科技股估值处于历史底部，美股科技龙头NVDA、AAPL等业绩超预期。港美科技指数同时覆盖两大市场，兼顾防御性与成长性。'},
+  {title:'新经济ETF：政策利好密集发布，内需赛道迎来拐点',date:'2026-04-09',market:'中国',sentiment:'看多',tag1:'中国',tag2:'新经济',summary:'促消费政策密集出台，以旧换新补贴加码。新经济指数聚焦消费+科技+医疗，受益于消费复苏与产业升级。指数成分股基本面边际改善，估值具吸引力。'},
+];
+const FLOW_IN = [
+  ['恒生港美科技ETF','3442.HK','+3.52亿'],['东西精选ETF','3441.HK','+1.81亿'],['沙特ETF','2830.HK','+1.23亿'],['恒生科技ETF','513130.SH','+0.95亿'],['亚太精选ETF','159687.SZ','+0.45亿'],['东南亚科技ETF','513730.SH','+0.38亿'],['新经济ETF','159822.SZ','+0.12亿'],
+];
+const FLOW_OUT = [
+  ['MS印度ETF','4366.HK','-0.82亿'],['中国消费ETF','2800.HK','-0.65亿'],['港交所ETF','3033.HK','-0.41亿'],['东盟ETF','2812.HK','-0.33亿'],['标普500ETF','3141.HK','-0.28亿'],['欧洲ETF','2810.HK','-0.19亿'],['日经ETF','3150.HK','-0.15亿'],
+];
+const CHANNELS = [
+  {icon:'&#x1F3E6;',name:'QDII',sub:'合格境内机构投资者',tax:'股息税 20%',limit:'额度受限',ok:'便捷',desc:'适合所有投资者',items:[{n:'恒生科技ETF',c:'513130.SH'},{n:'亚太精选ETF',c:'159687.SZ'},{n:'东南亚科技ETF',c:'513730.SH'},{n:'新经济ETF',c:'159822.SZ'},{n:'沙特ETF',c:'159329.SZ'},{n:'沙特ETF',c:'520830.SH'}]},
+  {icon:'&#x1F309;',name:'港股通',sub:'沪港通 / 深港通',tax:'股息税 20%',limit:'含在额度内',ok:'高便捷',desc:'高净值投资者',items:[{n:'恒生港美科技ETF',c:'3442.HK'},{n:'富时东西精选ETF',c:'3441.HK'},{n:'沙特阿拉伯ETF',c:'2830.HK'}]},
+  {icon:'&#x1F310;',name:'跨境理财通',sub:'大湾区居民专享',tax:'暂免所得税',limit:'有限额',ok:'中便捷',desc:'大湾区居民',items:[]},
+  {icon:'&#x2708;',name:'海外直投',sub:'境外券商开户',tax:'按当地法律',limit:'无限制',ok:'较低便捷',desc:'专业投资者',items:[]},
+];
+let curSort='chg',curDir='desc';
+function sw(i){document.querySelectorAll('.ta').forEach((t,j)=>t.classList.toggle('ac',j===i));document.querySelectorAll('.pn').forEach((p,j)=>p.classList.toggle('ac',j===i));}
+function cm(){document.getElementById('modal').classList.remove('open')}
+function sf(d){document.getElementById('ftabin').classList.toggle('ac',d==='in');document.getElementById('ftabout').classList.toggle('ac',d==='out');document.getElementById('finsec').classList.toggle('ac',d==='in');document.getElementById('foutsec').classList.toggle('ac',d==='out');}
+function pc(v){return v>=0?'up':'down';}
+function fmt(v){try{const n=parseFloat(v);return(n>=0?'+':'')+n.toFixed(2);}catch(e){return v;}}
+
+function renderChannels(){
+  document.getElementById('changrid').innerHTML=CHANNELS.map(ch=>{
+    const items=ch.items.map(it=>`<div class="chan-item"><span class="name">${it.n}</span><span class="cd">${it.c}</span></div>`).join('');
+    return `<div class="chan-card">\
+<div class="ci">${ch.icon}</div>\
+<div class="cn">${ch.name}</div>\
+<div class="cs">${ch.sub}</div>\
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">\
+<span class="f-limit">${ch.tax}</span><span class="f-warn">${ch.limit}</span>\
+</div>\
+<div style="font-size:11px;color:var(--dim);margin-bottom:8px">${ch.desc}</div>\
+${items?`<div class="chan-items">${items}</div>`:''}\
+</div>`;
+  }).join('');
+}
+
+function renderETFTbl(){
+  const keys=Object.keys(QT);
+  let rows=keys.map(k=>({k,...QT[k]})).sort((a,b)=>{
+    let av=a[curSort],bv=b[curSort];
+    if(typeof av==='string'){av=av.toLowerCase();bv=bv.toLowerCase();}
+    if(av<bv)return curDir==='asc'?1:-1;if(av>bv)return curDir==='asc'?-1:1;return 0;
+  });
+  document.getElementById('etftbody').innerHTML=rows.map(r=>{
+    const pclass=r.up?'up':'down',typeTag=r.type==='hks'?'<span class="tag-b">港股通</span>':'<span class="tag-o">QDII</span>';
+    const pmp=r.premium>=0?'up':'down';
+    const f1d=r.flow1d.startsWith('+')?'up':'down';
+    const f1m=r.flow1m.startsWith('+')?'up':'down';
+    return `<tr onclick="openM('${r.k}')" style="cursor:pointer">\
+<td><div style="font-weight:700">${r.name}ETF</div><div style="font-size:10.5px;color:var(--dim);margin-top:2px">${r.k} ${typeTag}</div></td>\
+<td class="nm ${pclass}" style="font-size:14px">${fmt(r.chg)}%</td>\
+<td class="nm ${pclass}">${r.last}</td>\
+<td class="nm" style="color:var(--text2)">${r.turnoverStr}</td>\
+<td class="nm ${pmp}">${fmt(r.premium)}%</td>\
+<td class="nm ${f1d}">${r.flow1d}</td>\
+<td class="nm ${f1m}">${r.flow1m}</td>\
+<td style="font-size:11px;color:var(--dim)">${r.index}</td>\
+</tr>`;
+  }).join('');
+  document.querySelectorAll('.th-sort').forEach(th=>{
+    th.classList.remove('sorted','asc','desc');
+    if(th.dataset.sort===curSort)th.classList.add('sorted',curDir);
+  });
+}
+
+document.getElementById('etftbl').querySelector('thead').addEventListener('click',e=>{
+  if(e.target.closest('.th-sort')){
+    const th=e.target.closest('.th-sort');const s=th.dataset.sort;
+    if(s===curSort)curDir=curDir==='desc'?'asc':'desc';else{curSort=s;curDir='desc';}
+    renderETFTbl();
+  }
+});
+
+function openM(code){
+  const d=QT[code];if(!d)return;
+  document.getElementById('mtitle').textContent=`${d.name}ETF (${code})`;
+  const pclass=d.up?'up':'down',pmp=d.premium>=0?'up':'down';
+  let html=`<div class="mprice-row">\
+<div><div class="mnav ${pclass}">${d.last}</div><div class="mchg ${pclass}">${fmt(d.chg)}%</div></div>\
+<div class="mprice-block"><div style="font-size:11px;color:var(--dim)">昨收</div><div style="font-size:17px;font-weight:800">${d.prev}</div></div>\
+<div class="mprice-block"><div style="font-size:11px;color:var(--dim)">估算净值</div><div style="font-size:17px;font-weight:800">${d.nav}</div></div>\
+<div class="mprice-block"><div style="font-size:11px;color:var(--dim)">折溢价</div><div style="font-size:17px;font-weight:800 ${pmp}">${fmt(d.premium)}%</div></div>\
+</div>\
+<div class="mmeta">\
+<span>&#x1F4C8 ${d.index}</span>\
+<span>&#x1F30D ${d.region}</span>\
+<span>&#x1F4B0 ${d.turnoverStr}成交</span>\
+<span>&#x2193 ${d.flow1d} 昨日净流入</span>\
+</div>\
+<div class="chart-wrap">\
+<div class="chart-title">分时走势 vs 昨收参考线</div>\
+<canvas id="kchart"></canvas>\
+<div class="chart-legend"><span><span class="cline cline-p"></span>实时价格</span><span><span class="cline cline-v"></span>昨收参考</span></div>\
+</div>`;
+  const hd=HOLD[code]||[];
+  if(hd.length>0){
+    html+=`<div class="hsec"><h4>前十大持仓（权重数据来源：Excel）</h4><div class="mtbl"><table><thead><tr><th>#</th><th>名称</th><th>代码</th><th>地区</th><th>权重</th></tr></thead><tbody>`;
+    html+=hd.map((r,i)=>`<tr><td class="rank">${i+1}</td><td style="font-weight:600">${r[0]}</td><td style="color:var(--dim);font-size:10.5px">${r[1]}</td><td><span class="tag-d">${r[2]}</span></td><td class="nm up">${r[3].toFixed(2)}%</td></tr>`).join('');
+    html+=`</tbody></table></div></div>`;
+  }
+  document.getElementById('mbody').innerHTML=html;
+  document.getElementById('modal').classList.add('open');
+  drawChart(code);
+}
+
+function drawChart(code){
+  const canvas=document.getElementById('kchart');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const data=IDATA[code]||[];
+  if(data.length===0)return;
+  const W=canvas.offsetWidth,H=150;
+  canvas.width=W;canvas.height=H;
+  const prices=data.map(d=>d[1]),refs=data.map(d=>d[2]);
+  const min=Math.min(...prices,...refs),max=Math.max(...prices,...refs);
+  const pad=8,top=8,bottom=10;
+  const innerH=H-top-bottom,innerW=W-pad*2;
+  const scaleY=v=>top+innerH-(v-min)/(max-min)*innerH;
+  const scaleX=i=>pad+i*(innerW/(data.length-1));
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#f0f0f0';ctx.lineWidth=0.5;
+  for(let i=0;i<=4;i++){const y=top+i*innerH/4;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(W-pad,y);ctx.stroke();}
+  const refY=scaleY(refs[0]);
+  ctx.strokeStyle='#ea580c';ctx.lineWidth=1;ctx.setLineDash([4,3]);
+  ctx.beginPath();ctx.moveTo(pad,refY);ctx.lineTo(W-pad,refY);ctx.stroke();
+  ctx.setLineDash([]);
+  const grad=ctx.createLinearGradient(0,top,0,H-bottom);
+  grad.addColorStop(0,'rgba(37,99,235,0.12)');grad.addColorStop(1,'rgba(37,99,235,0)');
+  ctx.fillStyle=grad;
+  ctx.beginPath();ctx.moveTo(scaleX(0),scaleY(prices[0]));
+  prices.forEach((p,i)=>{if(i>0)ctx.lineTo(scaleX(i),scaleY(p));});
+  ctx.lineTo(scaleX(prices.length-1),H-bottom);ctx.lineTo(scaleX(0),H-bottom);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#2563eb';ctx.lineWidth=1.8;
+  ctx.beginPath();prices.forEach((p,i)=>{i===0?ctx.moveTo(scaleX(i),scaleY(p)):ctx.lineTo(scaleX(i),scaleY(p));});ctx.stroke();
+  ctx.fillStyle='#9ca3af';ctx.font='9px sans-serif';ctx.textAlign='center';
+  const step=Math.floor(data.length/4);
+  [0,step,step*2,step*3,data.length-1].forEach(i=>{if(data[i])ctx.fillText(data[i][0],scaleX(i),H-2);});
+}
+
+function renderResearch(){
+  document.getElementById('rgrid').innerHTML=REPORTS.map(r=>{
+    const stag=r.sentiment==='看多'?'rtag-g':r.sentiment==='看空'?'rtag-r':r.sentiment==='中性'?'rtag-o':'rtag-b';
+    return `<div class="rcard">\
+<div class="rtop"><span class="rtag ${stag}">${r.market} · ${r.sentiment}</span><span class="rdate">${r.date}</span></div>\
+<div class="rtitle">${r.title}</div>\
+<div class="rsummary">${r.summary}</div>\
+<div class="rfooter"><span class="rsrc">机构观点</span><div class="rtags">${[r.tag1,r.tag2,r.tag3].filter(Boolean).map(t=>`<span>${t}</span>`).join('')}</div></div>\
+</div>`;
+  }).join('');
+}
+
+function renderFlow(){
+  document.getElementById('flowintable').innerHTML=FLOW_IN.map((r,i)=>`<tr><td class="rnum">${i+1}</td><td><div class="fname">${r[0]}</div><div class="fcode">${r[1]}</div></td><td class="famt up">${r[2]}</td></tr>`).join('');
+  document.getElementById('flowouttable').innerHTML=FLOW_OUT.map((r,i)=>`<tr><td class="rnum">${i+1}</td><td><div class="fname">${r[0]}</div><div class="fcode">${r[1]}</div></td><td class="famt down">${r[2]}</td></tr>`).join('');
+}
+
+document.getElementById('upt').textContent='更新: '+new Date().toLocaleTimeString('zh-CN');
+document.addEventListener('keydown',e=>{if(e.key==='Escape')cm();});
+renderChannels();
+renderETFTbl();
+renderResearch();
+renderFlow();
+</script>
+</body>
+</html>

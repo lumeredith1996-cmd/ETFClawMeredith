@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polymarket 热门预测看板</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh;padding-bottom:80px}
+.header{background:linear-gradient(135deg,#1a1d2e 0%,#2d1b4e 100%);padding:24px 20px 20px;color:#fff}
+.header h1{font-size:22px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.header p{font-size:12px;opacity:0.6}
+.updated{font-size:11px;opacity:0.45;margin-top:6px}
+.cat-tabs{display:flex;gap:8px;padding:14px 20px;background:#1a1d2e;flex-wrap:wrap;position:sticky;top:0;z-index:10}
+.cat-tab{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;background:#252536;color:#9ca3af;border:1px solid #2d2d3d;transition:all 0.15s}
+.cat-tab:hover{background:#2d2d4d;color:#fff}
+.cat-tab.active{background:#6366f1;color:#fff;border-color:#6366f1}
+.content{padding:20px;max-width:1200px;margin:0 auto}
+.disclaimer{font-size:10px;color:#4b5563;padding:16px 20px;text-align:center;line-height:1.8;border-top:1px solid #1a1d2e;margin-top:20px}
+.no-data{text-align:center;padding:40px 20px;color:#6b7280;font-size:13px}
+.cat-section{margin-bottom:40px}
+.cat-title{font-size:16px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #252536;display:flex;align-items:center;gap:8px}
+.market-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.market-card{background:#1a1d2e;border:1px solid #252536;border-radius:12px;padding:16px;transition:all 0.2s}
+.market-card:hover{border-color:#6366f1;transform:translateY(-2px);box-shadow:0 4px 20px rgba(99,102,241,0.1)}
+.market-link{display:inline-block;font-size:11px;color:#6366f1;text-decoration:none;margin-bottom:8px}
+.market-link:hover{text-decoration:underline}
+.market-question{font-size:13px;font-weight:600;color:#f1f5f9;margin-bottom:12px;line-height:1.5;min-height:40px}
+.outcome-bar{margin-bottom:6px}
+.outcome-label{font-size:12px;color:#9ca3af;margin-bottom:3px;display:flex;justify-content:space-between;align-items:center}
+.pct-badge{font-size:13px;font-weight:700;min-width:36px;text-align:right}
+.yes-pct{color:#22c55e}
+.no-pct{color:#ef4444}
+.outcome-track{height:5px;background:#252536;border-radius:3px;overflow:hidden}
+.outcome-fill{height:100%;border-radius:3px;transition:width 0.5s ease}
+.outcome-fill.yes{background:linear-gradient(90deg,#16a34a,#22c55e)}
+.outcome-fill.no{background:linear-gradient(90deg,#dc2626,#ef4444)}
+.outcome-fill.neutral{background:linear-gradient(90deg,#6366f1,#818cf8)}
+.refresh-bar{text-align:center;padding:12px;background:#1a1d2e;border-bottom:1px solid #252536}
+.refresh-bar button{background:#252536;color:#9ca3af;border:1px solid #2d2d3d;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:12px;transition:all 0.15s}
+.refresh-bar button:hover{background:#2d2d4d;color:#fff}
+@media(max-width:600px){.market-grid{grid-template-columns:1fr}.content{padding:16px}.cat-tabs{padding:10px 16px}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🔮 Polymarket 热门预测看板</h1>
+  <p>实时抓取 Polymarket 全球预测市场 · 真金白银押注的市场共识</p>
+  <div class="updated">数据更新时间：2026/4/19 22:59:17 · 每6小时自动刷新</div>
+</div>
+
+<div class="refresh-bar">
+  <button onclick="location.reload()">🔄 刷新数据</button>
+</div>
+
+<div class="cat-tabs">
+  <button class="cat-tab active" onclick="showSection('ai', this)">🤖 AI</button>
+  <button class="cat-tab" onclick="showSection('hormuz', this)">⚓ 霍尔木兹</button>
+  <button class="cat-tab" onclick="showSection('iran', this)">🌍 美伊局势</button>
+  <button class="cat-tab" onclick="showSection('finance', this)">💰 金融</button>
+</div>
+
+<div class="content">
+  <div class="no-data">暂无数据，请刷新页面</div>
+</div>
+
+<div class="disclaimer">
+  ⚠️ 数据来源：<a href="https://polymarket.com" style="color:#6366f1">Polymarket.com</a> · 概率仅供参考，不构成投资建议 · 市场有风险，入市需谨慎<br>
+  本页面每6小时自动从Polymarket抓取最新数据 · 预测市场反映真金白银的市场情绪
+</div>
+
+<script>
+function showSection(id, btn) {
+  // Update tabs
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  
+  // Show/hide sections
+  document.querySelectorAll('.cat-section').forEach(s => {
+    s.style.display = 'none';
+  });
+  const target = document.getElementById('sec-' + id);
+  if (target) target.style.display = 'block';
+}
+
+// Show AI section by default on load
+showSection('ai', document.querySelector('.cat-tab.active'));
+
+// URL hash support
+if (window.location.hash) {
+  const cat = window.location.hash.replace('#', '');
+  const btn = document.querySelector(`.cat-tab[onclick*="${cat}"]`);
+  if (btn) showSection(cat, btn);
+}
+</script>
+
+</body>
+</html>

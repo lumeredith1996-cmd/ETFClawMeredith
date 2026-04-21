@@ -100,7 +100,7 @@ holdings_files = {
     '513730.SH': '/root/.openclaw/media/inbound/\xe4\xb8\x9c\xe5\x9c\xb0\xe7\xa7\x91\xe6\x8a\x80ETF_2026-04-10---bb2540ac-8510-4621-a4f2-fecd4cf4ff72.xlsx',
     '159687.SZ': '/root/.openclaw/media/inbound/\xe4\xba\x9a\xe5\xa4\xaa\xe7\xb2\xbe\xe9\x80\x89ETF_2026-04-10---73e27b36-185e-4f17-8d69-39c201057957.xlsx',
     '3441.HK': '/root/.openclaw/media/inbound/\xe4\xb8\x9c\xe8\xa5\xbf\xe7\xb2\xbe\xe9\x80\x89_2026-04-10---43206195-743b-4dd8-a066-d2bbaecc5d58.xlsx',
-    '3442.HK': '/root/.openclaw/media/inbound/\xe6\xb8\xaf\xe7\xbe\x8e\xe7\xa7\x91\xe6\x8a\x80_2026-04-10---02a799fe-55e9-45af-b620-288cd5b1b0aa.xlsx',
+    '3442.HK': '/root/.openclaw/media/inbound/\xe6\xb8\xaf\xe7\xbe\x8e\xe7\xa7\x91\xe6\x8a\x80_2026-04-17---8a9981ae-06f4-4dea-aec8-05e6e4a15f01.xlsx',
     '2830.HK': '/root/.openclaw/media/inbound/\xe6\xb2\x99\xe7\x89\xb9_2026-04-13---baa6fc66-98d6-428f-b8f7-6db42705cc21.xlsx',
 }
 for code, path in holdings_files.items():
